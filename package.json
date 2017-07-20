@@ -1,0 +1,16 @@
+{
+  "name": "event-guests_pc_node-js",
+  "version": "0.0.0",
+  "description": "EventGuests_PC_NodeJS",
+  "main": "server.js",
+  "author": {
+    "name": "Ori_Work"
+  },
+  "dependencies": {
+    "body-parser": "^1.0.2",
+    "express": "^4.15.3",
+    "mysql": "^2.13.0",
+    "soap": "^0.19.2",
+    "sql-injection": "0.0.6"
+  }
+}
