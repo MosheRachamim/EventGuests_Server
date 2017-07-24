@@ -9,7 +9,7 @@ var app = express();
 var bodyParser = require('body-parser');
 var mysql = require('mysql');
 var soap = require('soap');
-var SocksConnection = require('socksjs');
+//var SocksConnection = require('socksjs');
 var url = require('url');
 const fixieUrl = url.parse(process.env.FIXIE_URL || SQL_URL );
 
