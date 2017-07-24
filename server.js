@@ -31,18 +31,26 @@ var socks_options = {
 };
 console.log(fixieUrl.hostname);
 console.log('test44');
-var socksConn = new SocksConnection(mysql_server_options, socks_options);
+//var socksConn = new SocksConnection(mysql_server_options, socks_options);
 
-var mysql_options = {
+//var mysql_options = {
+//	connectionLimit: SQLMAXCONNECTIONS,
+//	host: SQL_URL,
+//	user: "wiselyev_wiselys",
+//	password: "KT{r#fI&fv9c",
+//	database: "wiselyev_wisely_app_sit",
+//	stream: socksConn
+//}
+
+//var connPool = mysql.createPool(mysql_options);
+
+var connPool = mysql.createPool({
 	connectionLimit: SQLMAXCONNECTIONS,
 	host: SQL_URL,
 	user: "wiselyev_wiselys",
 	password: "KT{r#fI&fv9c",
-	database: "wiselyev_wisely_app_sit",
-	stream: socksConn
-}
-
-var connPool = mysql.createPool(mysql_options);
+	database: "wiselyev_wisely_app_sit"
+});
 
 console.log('connection2 made to db');
 // configure app to use bodyParser()
