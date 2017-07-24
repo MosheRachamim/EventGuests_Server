@@ -30,8 +30,8 @@ var socks_options = {
 	pass: fixieUrl.auth.password
 };
 console.log(fixieUrl.hostname);
+var socksConn = new SocksConnection(mysql_server_options, socks_options);
 console.log('test44');
-//var socksConn = new SocksConnection(mysql_server_options, socks_options);
 
 //var mysql_options = {
 //	connectionLimit: SQLMAXCONNECTIONS,
