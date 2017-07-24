@@ -31,20 +31,21 @@ var socks_options = {
 	pass: fixieUrl.auth.password
 };
 console.log(fixieUrl.hostname);
-//console.log('test45');
-//var socksConn = new SocksConnection(mysql_server_options, socks_options);
-//console.log('test46');
+console.log('test45');
+var socksConn = new SocksConnection(mysql_server_options, socks_options);
+console.log('test46');
 
-//var mysql_options = {
-//	connectionLimit: SQLMAXCONNECTIONS,
-//	host: SQL_URL,
-//	user: "wiselyev_wiselys",
-//	password: "KT{r#fI&fv9c",
-//	database: "wiselyev_wisely_app_sit",
-//	stream: socksConn
-//}
+var mysql_options = {
+	connectionLimit: SQLMAXCONNECTIONS,
+	host: SQL_URL,
+	user: "wiselyev_wiselys",
+	password: "KT{r#fI&fv9c",
+	database: "wiselyev_wisely_app_sit",
+	stream: socksConn
+}
 
-//var connPool = mysql.createPool(mysql_options);
+var connPool2 = mysql.createPool(mysql_options);
+console.log('test47');
 
 var connPool = mysql.createPool({
 	connectionLimit: SQLMAXCONNECTIONS,
