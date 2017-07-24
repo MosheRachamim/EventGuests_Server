@@ -1,30 +1,56 @@
 'use strict';
 //consts.
 var SQLMAXCONNECTIONS = 90;
+var SERVER_PORT = 1337;
+var SQL_URL = "81.218.117.73"
 
 var express = require('express');
 var app = express();
 var bodyParser = require('body-parser');
 var mysql = require('mysql');
 var soap = require('soap');
+var url = require('url');
+const fixieUrl = url.parse(process.env.FIXIE_URL || SQL_URL );
 
 var sms_url = 'http://www.smsapi.co.il/Web_API/SendSMS.asmx?wsdl';
 
 
-var connPool = mysql.createPool({
+var mysql_server_options = {
 	connectionLimit: SQLMAXCONNECTIONS,
-	host: "81.218.117.73",
+	host: SQL_URL,
 	user: "wiselyev_wiselys",
 	password: "KT{r#fI&fv9c",
 	database: "wiselyev_wisely_app_sit"
-});
-console.log('connection made to db');
+};
+
+var socks_options = {
+	host: fixieUrl.hostname,
+	port: fixieUrl.port,
+	user: fixieUrl.auth.user,
+	pass: fixieUrl.auth.password
+};
+console.log(fixieUrl.hostname);
+console.log('test44');
+var socksConn = new SocksConnection(mysql_server_options, socks_options);
+
+var mysql_options = {
+	connectionLimit: SQLMAXCONNECTIONS,
+	host: SQL_URL,
+	user: "wiselyev_wiselys",
+	password: "KT{r#fI&fv9c",
+	database: "wiselyev_wisely_app_sit",
+	stream: socksConn
+}
+
+var connPool = mysql.createPool(mysql_options);
+
+console.log('connection2 made to db');
 // configure app to use bodyParser()
 // this will let us get the data from a POST
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
-var port = process.env.PORT || 1337;        // set our port
+var port = process.env.PORT || SERVER_PORT;        // set our port
 
 // ROUTES FOR OUR API
 // =============================================================================
