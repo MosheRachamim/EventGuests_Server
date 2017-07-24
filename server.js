@@ -9,6 +9,7 @@ var app = express();
 var bodyParser = require('body-parser');
 var mysql = require('mysql');
 var soap = require('soap');
+var SocksConnection = require('socksjs');
 var url = require('url');
 const fixieUrl = url.parse(process.env.FIXIE_URL || SQL_URL );
 
@@ -30,8 +31,9 @@ var socks_options = {
 	pass: fixieUrl.auth.password
 };
 console.log(fixieUrl.hostname);
+console.log('test45');
 var socksConn = new SocksConnection(mysql_server_options, socks_options);
-console.log('test44');
+console.log('test46');
 
 //var mysql_options = {
 //	connectionLimit: SQLMAXCONNECTIONS,
