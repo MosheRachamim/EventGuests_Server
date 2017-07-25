@@ -2,7 +2,10 @@
 //consts.
 var SQLMAXCONNECTIONS = 90;
 var SERVER_PORT = 1337;
-var SQL_URL = "81.218.117.73"
+var SQL_URL = "212.179.232.90";//"81.218.117.73";
+var SQL_User = "sa";//"wiselyev_wiselys";
+var SQL_Password = "123456";//"KT{r#fI&fv9c";
+var SQL_DB_Name = "Moshe";// "wiselyev_wisely_app_sit";
 
 var express = require('express');
 var app = express();
@@ -35,9 +38,9 @@ if (fixieUrl) {
 	connPool = mysql.createPool({
 		connectionLimit: SQLMAXCONNECTIONS,
 		host: SQL_URL,
-		user: "wiselyev_wiselys",
-		password: "KT{r#fI&fv9c",
-		database: "wiselyev_wisely_app_sit",
+		user: SQL_User,
+		password: SQL_Password,
+		database: SQL_DB_Name,
 		stream: fixieConnection
 	});
 }
@@ -45,9 +48,9 @@ else {
 	 connPool = mysql.createPool({
 		connectionLimit: SQLMAXCONNECTIONS,
 		host: SQL_URL,
-		user: "wiselyev_wiselys",
-		password: "KT{r#fI&fv9c",
-		database: "wiselyev_wisely_app_sit"
+		user: SQL_User,
+		password: SQL_Password,
+		database: SQL_DB_Name
 	});
 }
 
