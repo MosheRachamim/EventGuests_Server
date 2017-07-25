@@ -7,55 +7,51 @@ var SQL_URL = "81.218.117.73"
 var express = require('express');
 var app = express();
 var bodyParser = require('body-parser');
-var mysql = require('mysql');
+var SocksConnection = require('socksjs');
+var mysql = require('mysql2');
 var soap = require('soap');
-var SocksConnection = require('sockjs');
-var url = require('url');
-const fixieUrl = url.parse(process.env.FIXIE_URL || SQL_URL );
-
-var sms_url = 'http://www.smsapi.co.il/Web_API/SendSMS.asmx?wsdl';
-
-
-var mysql_server_options = {
-	connectionLimit: SQLMAXCONNECTIONS,
-	host: SQL_URL,
-	user: "wiselyev_wiselys",
-	password: "KT{r#fI&fv9c",
-	database: "wiselyev_wisely_app_sit"
-};
-
-var socks_options = {
-	host: fixieUrl.hostname,
-	port: fixieUrl.port,
-	user: fixieUrl.auth.user,
-	pass: fixieUrl.auth.password
-};
-console.log(fixieUrl.hostname);
-console.log('test45');
-var socksConn = new SocksConnection(mysql_server_options, socks_options);
-console.log('test46');
-
-var mysql_options = {
-	connectionLimit: SQLMAXCONNECTIONS,
-	host: SQL_URL,
-	user: "wiselyev_wiselys",
-	password: "KT{r#fI&fv9c",
-	database: "wiselyev_wisely_app_sit",
-	stream: socksConn
+var fixieUrl = process.env.FIXIE_SOCKS_HOST;
+var fixieValues;
+if (fixieUrl) {
+	fixieValues = fixieUrl.split(new RegExp('[/(:\\/@)/]+'));
 }
 
-var connPool2 = mysql.createPool(mysql_options);
-console.log('test47');
+var sms_url = 'http://www.smsapi.co.il/Web_API/SendSMS.asmx?wsdl';
+var connPool;
+if (fixieUrl) {
 
-var connPool = mysql.createPool({
-	connectionLimit: SQLMAXCONNECTIONS,
-	host: SQL_URL,
-	user: "wiselyev_wiselys",
-	password: "KT{r#fI&fv9c",
-	database: "wiselyev_wisely_app_sit"
-});
+	const mysqlServer = {
+		host: SQL_URL,
+		port: 3306
+	};
 
-console.log('connection2 made to db');
+	const fixieConnection = new SocksConnection(mysqlServer, {
+		user: fixieValues[0],
+		pass: fixieValues[1],
+		host: fixieValues[2],
+		port: fixieValues[3],
+	});
+
+	connPool = mysql.createPool({
+		connectionLimit: SQLMAXCONNECTIONS,
+		host: SQL_URL,
+		user: "wiselyev_wiselys",
+		password: "KT{r#fI&fv9c",
+		database: "wiselyev_wisely_app_sit",
+		stream: fixieConnection
+	});
+}
+else {
+	 connPool = mysql.createPool({
+		connectionLimit: SQLMAXCONNECTIONS,
+		host: SQL_URL,
+		user: "wiselyev_wiselys",
+		password: "KT{r#fI&fv9c",
+		database: "wiselyev_wisely_app_sit"
+	});
+}
+
+console.log('connection made to db');
 // configure app to use bodyParser()
 // this will let us get the data from a POST
 app.use(bodyParser.json({ limit: '50mb' }));
