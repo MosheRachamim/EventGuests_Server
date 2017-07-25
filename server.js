@@ -25,7 +25,10 @@ if (fixieUrl) {
 
 	const mysqlServer = {
 		host: SQL_URL,
-		port: 3306
+		port: 3306,
+		user: SQL_User,
+		password: SQL_Password,
+		database: SQL_DB_Name,
 	};
 
 	const fixieConnection = new SocksConnection(mysqlServer, {
