@@ -43,6 +43,8 @@ if (fixieUrl) {
 		database: SQL_DB_Name,
 		stream: fixieConnection
 	});
+
+	console.log('connection made to db via Fixie');
 }
 else {
 	 connPool = mysql.createPool({
@@ -52,9 +54,10 @@ else {
 		password: SQL_Password,
 		database: SQL_DB_Name
 	});
+
+	 console.log('connection made to db directly');
 }
 
-console.log('connection made to db');
 // configure app to use bodyParser()
 // this will let us get the data from a POST
 app.use(bodyParser.json({ limit: '50mb' }));
