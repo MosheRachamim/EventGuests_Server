@@ -4,7 +4,7 @@ var SQLMAXCONNECTIONS = 90;
 var SERVER_PORT = 1337;
 var SQL_URL = "81.218.117.73";
 var SQL_User = "wiselyev_wiselys";
-var SQL_Password "KT{r#fI&fv9c";
+var SQL_Password ="KT{r#fI&fv9c";
 var SQL_DB_Name =  "wiselyev_wisely_app_sit";
 
 var express = require('express');
