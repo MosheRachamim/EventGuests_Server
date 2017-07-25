@@ -2,10 +2,16 @@
 //consts.
 var SQLMAXCONNECTIONS = 90;
 var SERVER_PORT = 1337;
-var SQL_URL = "81.218.117.73";
-var SQL_User = "wiselyev_wiselys";
-var SQL_Password ="KT{r#fI&fv9c";
-var SQL_DB_Name =  "wiselyev_wisely_app_sit";
+//dev
+var SQL_URL = "212.179.232.90";
+var SQL_User = "Moshe";
+var SQL_Password ="sa";
+var SQL_DB_Name =  "123456";
+//prod
+//var SQL_URL = "81.218.117.73";
+//var SQL_User = "wiselyev_wiselys";
+//var SQL_Password = "KT{r#fI&fv9c";
+//var SQL_DB_Name = "wiselyev_wisely_app_sit";
 
 var express = require('express');
 var app = express();
@@ -29,7 +35,6 @@ if (fixieUrl) {
 		user: SQL_User,
 		password: SQL_Password,
 		database: SQL_DB_Name,
-		acquireTimeout: 1000000
 	};
 
 	const fixieConnection = new SocksConnection(mysqlServer, {
@@ -45,7 +50,6 @@ if (fixieUrl) {
 		user: SQL_User,
 		password: SQL_Password,
 		database: SQL_DB_Name,
-		acquireTimeout: 1000000,
 		stream: fixieConnection
 	});
 
