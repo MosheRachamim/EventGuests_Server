@@ -29,6 +29,7 @@ if (fixieUrl) {
 		user: SQL_User,
 		password: SQL_Password,
 		database: SQL_DB_Name,
+		acquireTimeout: 1000000
 	};
 
 	const fixieConnection = new SocksConnection(mysqlServer, {
@@ -44,7 +45,8 @@ if (fixieUrl) {
 		user: SQL_User,
 		password: SQL_Password,
 		database: SQL_DB_Name,
-		stream: fixieConnection
+		acquireTimeout: 1000000
+		stream: fixieConnection,
 	});
 
 	console.log('connection made to db via Fixie');
