@@ -32,10 +32,7 @@ if (proxyUrl ) {
 
 	const mysqlServer = {
 		host: SQL_URL,
-		port: 3306,
-		user: SQL_User,
-		password: SQL_Password,
-		database: SQL_DB_Name,
+		port: 3306
 	};
 
 	var proxy = url.parse(process.env.QUOTAGUARDSTATIC_URL),
