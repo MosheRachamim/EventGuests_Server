@@ -3,15 +3,15 @@
 var SQLMAXCONNECTIONS = 90;
 var SERVER_PORT = 1337;
 //dev
-//var SQL_URL = "212.179.232.90";
-//var SQL_User = "sa";
-//var SQL_Password ="123456";
-//var SQL_DB_Name =  "moshe";
+var SQL_URL = "212.179.232.90";
+var SQL_User = "sa";
+var SQL_Password = "123456";
+var SQL_DB_Name = "moshe";
 //prod
-var SQL_URL = "81.218.117.73";
-var SQL_User = "wiselyev_wiselys";
-var SQL_Password = "KT{r#fI&fv9c";
-var SQL_DB_Name = "wiselyev_wisely_app_sit";
+//var SQL_URL = "81.218.117.73";
+//var SQL_User = "wiselyev_wiselys";
+//var SQL_Password = "KT{r#fI&fv9c";
+//var SQL_DB_Name = "wiselyev_wisely_app_sit";
 
 var express = require('express');
 var app = express();
@@ -19,26 +19,32 @@ var bodyParser = require('body-parser');
 var SocksConnection = require('socksjs');
 var mysql = require('mysql2');
 var soap = require('soap');
-var fixieUrl = process.env.FIXIE_SOCKS_HOST;
-var fixieValues;
-if (fixieUrl) {
-	fixieValues = fixieUrl.split(new RegExp('[/(:\\/@)/]+'));
-}
+var url = require('url');
+var proxyUrl = process.env.QUOTAGUARDSTATIC_URL;
+//var fixieValues;
+//if (fixieUrl) {
+//	fixieValues = fixieUrl.split(new RegExp('[/(:\\/@)/]+'));
+//}
 
 var sms_url = 'http://www.smsapi.co.il/Web_API/SendSMS.asmx?wsdl';
 var connPool;
-if (fixieUrl) {
+if (proxyUrl) {
 
 	const mysqlServer = {
-	    host: SQL_URL,
-		port: 3306,
+		host: SQL_URL,
+		port: 3306
 	};
 
-	const fixieConnection = new SocksConnection(mysqlServer, {
-		user: fixieValues[0],
-		pass: fixieValues[1],
-		host: fixieValues[2],
-		port: fixieValues[3],
+	var proxy = url.parse(process.env.QUOTAGUARDSTATIC_URL),
+		auth = proxy.auth,
+		username = auth.split(':')[0],
+		pass = auth.split(':')[1];
+
+	const proxyConnection = new SocksConnection(mysqlServer, {
+		host: proxy.hostname,
+		port: 1080,
+		user: username,
+		pass: pass,
 	});
 
 	connPool = mysql.createPool({
@@ -47,13 +53,13 @@ if (fixieUrl) {
 		user: SQL_User,
 		password: SQL_Password,
 		database: SQL_DB_Name,
-		stream: fixieConnection
+		stream: proxyConnection
 	});
 
-	console.log('connection made to db via Fixie');
+	console.log('connection made to db via Proxy');
 }
 else {
-	 connPool = mysql.createPool({
+	connPool = mysql.createPool({
 		connectionLimit: SQLMAXCONNECTIONS,
 		host: SQL_URL,
 		user: SQL_User,
@@ -61,7 +67,7 @@ else {
 		database: SQL_DB_Name
 	});
 
-	 console.log('connection made to db directly');
+	console.log('connection made to db directly');
 }
 
 // configure app to use bodyParser()
