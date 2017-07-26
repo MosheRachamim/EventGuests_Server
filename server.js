@@ -3,15 +3,15 @@
 var SQLMAXCONNECTIONS = 90;
 var SERVER_PORT = 1337;
 //dev
-var SQL_URL = "212.179.232.90";
-var SQL_User = "sa";
-var SQL_Password = "123456";
-var SQL_DB_Name = "moshe";
+//var SQL_URL = "212.179.232.90";
+//var SQL_User = "sa";
+//var SQL_Password = "123456";
+//var SQL_DB_Name = "moshe";
 //prod
-//var SQL_URL = "81.218.117.73";
-//var SQL_User = "wiselyev_wiselys";
-//var SQL_Password = "KT{r#fI&fv9c";
-//var SQL_DB_Name = "wiselyev_wisely_app_sit";
+var SQL_URL = "81.218.117.73";
+var SQL_User = "wiselyev_wiselys";
+var SQL_Password = "KT{r#fI&fv9c";
+var SQL_DB_Name = "wiselyev_wisely_app_sit";
 
 var express = require('express');
 var app = express();
@@ -21,10 +21,6 @@ var mysql = require('mysql2');
 var soap = require('soap');
 var url = require('url');
 var proxyUrl = process.env.QUOTAGUARDSTATIC_URL;
-//var fixieValues;
-//if (fixieUrl) {
-//	fixieValues = fixieUrl.split(new RegExp('[/(:\\/@)/]+'));
-//}
 
 var sms_url = 'http://www.smsapi.co.il/Web_API/SendSMS.asmx?wsdl';
 var connPool;
