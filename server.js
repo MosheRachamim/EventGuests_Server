@@ -6,8 +6,8 @@ var SERVER_PORT = 1337;
 //var SQL_URL = "212.179.232.90";
 //var SQL_User = "sa";
 //var SQL_Password = "123456";
-//var SQL_DB_Name = "moshe";
-//prod
+//var SQL_DB_Name = "wiselyev_wisely_app_sit";
+////prod
 var SQL_URL = "81.218.117.73";
 var SQL_User = "wiselyev_wiselys";
 var SQL_Password = "KT{r#fI&fv9c";
@@ -21,6 +21,8 @@ var mysql = require('mysql2');
 var soap = require('soap');
 var url = require('url');
 var proxyUrl = process.env.QUOTAGUARDSTATIC_URL;
+var moment = require('moment-timezone');
+var StringBuilder = require('string-builder');
 
 var sms_url = 'http://www.smsapi.co.il/Web_API/SendSMS.asmx?wsdl';
 var connPool;
@@ -49,10 +51,11 @@ if (proxyUrl) {
 		user: SQL_User,
 		password: SQL_Password,
 		database: SQL_DB_Name,
-		stream: proxyConnection
+		stream: proxyConnection,
+		multipleStatements: true,
 	});
 
-	console.log('connection made to db via Proxy');
+	console.log('connection made to db (' + SQL_URL + ') via Proxy');
 }
 else {
 	connPool = mysql.createPool({
@@ -60,10 +63,11 @@ else {
 		host: SQL_URL,
 		user: SQL_User,
 		password: SQL_Password,
-		database: SQL_DB_Name
+		database: SQL_DB_Name,
+		multipleStatements: true,
 	});
 
-	console.log('connection made to db directly');
+	console.log('connection made to db (' + SQL_URL + ') directly');
 }
 
 // configure app to use bodyParser()
@@ -100,7 +104,7 @@ router.get('/view', function (req, res) {
 			return;
 			//throw err;
 		}
-		//console.log(result);
+		//console.log(JSON.stringify(result));
 		res.end(JSON.stringify(result[0]));
 	});
 
@@ -170,9 +174,10 @@ router.route('/update/:guest_id')
 
 	.post(function (req, res) {
 		res.writeHead(200, { 'Content-Type': 'text/plain' });
+		//console.log(getTimeOfDay(req.body.LastUpdateDate));
 		//update db
 		var lQuery = "Update guests set " +
-			" new_handled_by=" + connPool.escape(req.body.HandledBy) + ", new_arrival_time ='" + req.body.LastUpdateDate +
+			" new_handled_by=" + connPool.escape(req.body.HandledBy) + ", new_arrival_time ='" + getTimeOfDay(req.body.LastUpdateDate) +
 			"', new_num_guests=" + req.body.NumOfGuestsAttending + ", num_guests=" + req.body.NumOfGuestsApproved +
 			", Name=" + connPool.escape(req.body.Name) + ", phone =" + connPool.escape(req.body.PhoneNumber) +
 			", category =" + connPool.escape(req.body.Group) + ", side =" + connPool.escape(req.body.WeddingSide) +
@@ -215,6 +220,86 @@ router.route('/update/:guest_id')
 
 	});
 
+//api: bulk update guest approved
+
+router.route('/bulkupdate/')
+
+	.post(function (req, res) {
+
+		if (!req.body.Items) 
+			return;
+		
+		res.writeHead(200, { 'Content-Type': 'text/plain' });
+		//console.log(getTimeOfDay(req.body.LastUpdateDate));
+		var sb = new StringBuilder();
+		for (var i = 0; i < req.body.Items.length; i++) {
+			var guest = req.body.Items[i];
+			var lQueryOne = "Update guests set " +
+				" new_handled_by=" + connPool.escape(guest.HandledBy) + ", new_arrival_time ='" + getTimeOfDay(guest.LastUpdateDate) +
+				"', new_num_guests=" + guest.NumOfGuestsAttending + ", num_guests=" + guest.NumOfGuestsApproved +
+				", Name=" + connPool.escape(guest.Name) + ", phone =" + connPool.escape(guest.PhoneNumber) +
+				", category =" + connPool.escape(guest.Group) + ", side =" + connPool.escape(guest.WeddingSide) +
+				", table_number =" + connPool.escape(guest.TableNumber) + ", comments =" + connPool.escape(guest.Comments) +
+				" where guest_id=" + guest.GuestId + ";";
+			lQueryOne = lQueryOne.replace(/'null'/g, "null");  //fix for null values.
+			sb.appendLine(lQueryOne);
+		}
+		var query = sb.toString();
+		//console.log(query);
+		//update db
+		//console.log(lQuery);
+		connPool.query(query, function (err, result, fields) {
+			if (err) {
+				logError(err, "/update");
+				res.end("Error " + err);
+				return;
+			}
+			//console.log(result);
+			res.end(JSON.stringify(result));
+		});
+
+		req.body.Items.forEach(function (guest) {
+
+			//send sms.
+			if (guest.SMSMessageText == null) {
+				return;
+			}
+			soap.createClient(sms_url, function (err, client) {
+				if (err) {
+					logError(err, "/update");
+					res.end("Error " + err);
+					return;
+				}
+				var sms_args = {
+					XMLString: "<SMS>\r\n<USERNAME>040553513</USERNAME>\r\n<PASSWORD>MeshiChen11</PASSWORD>\r\n<SENDER_PREFIX>ALFA</SENDER_PREFIX>\r\n<SENDER_SUFFIX><![CDATA[WiselyEvent]]></SENDER_SUFFIX>\r\n<MSGLNG>HEB</MSGLNG>\r\n<MSG><![CDATA[" + guest.SMSMessageText + "]]></MSG>\r\n<MOBILE_LIST>\r\n <MOBILE_NUMBER>" + guest.PhoneNumber + "</MOBILE_NUMBER>\r\n</MOBILE_LIST>\r\n<UNICODE>False</UNICODE>\r\n<USE_PERSONAL>False</USE_PERSONAL>\r\n</SMS>"
+				};
+
+				client.SUBMITSMS(sms_args, function (err, result) {
+					if (err || !result.SUBMITSMSResult.startsWith("Submit OK")) {
+						logError(err, "/update");
+
+					}
+					console.log(result);
+				});
+			});
+		});
+
+	});
+
+//helper function: convert datetime value to time
+function getTimeOfDay(dateTime) {
+
+	if (dateTime != null) {
+
+		var datetimeUTC = new moment(dateTime).format("HH:mm:ss");
+
+		return datetimeUTC;
+	}
+	else {
+		return null;
+	}
+}
+
 router.route('/sendStatsSms/')
 
 	.post(function (req, res) {
@@ -244,6 +329,37 @@ router.route('/sendStatsSms/')
 		});
 
 	});
+
+router.route('/sendAttendingSms/')
+
+	.post(function (req, res) {
+		res.writeHead(200, { 'Content-Type': 'text/plain' });
+
+		soap.createClient(sms_url, function (err, client) {
+			if (err) {
+				logError(err, "/sendAttendingSms");
+				res.end("Error " + err);
+				return;
+			}
+			var sms_args = {
+				XMLString: "<SMS>\r\n<USERNAME>040553513</USERNAME>\r\n<PASSWORD>MeshiChen11</PASSWORD>\r\n<SENDER_PREFIX>ALFA</SENDER_PREFIX>\r\n<SENDER_SUFFIX><![CDATA[WiselyEvent]]></SENDER_SUFFIX>\r\n<MSGLNG>HEB</MSGLNG>\r\n<MSG><![CDATA[" + req.body.SMSMessageText + "]]></MSG>\r\n" + req.body.PhoneNumbersXML + "\r\n<UNICODE>False</UNICODE>\r\n<USE_PERSONAL>False</USE_PERSONAL>\r\n</SMS>"
+			};
+
+			client.SUBMITSMS(sms_args, function (err, result) {
+				if (!err && result.SUBMITSMSResult.startsWith("Submit OK")) {
+
+					res.end("OK");
+				} else {
+					logError(err, "/sendAttendingSms");
+					res.end("Error: " + err + "\r\n" + JSON.stringify(result));
+				}
+				console.log(result);
+
+			});
+		});
+
+	});
+
 
 router.route('/sendMissingGuestsSms/')
 
