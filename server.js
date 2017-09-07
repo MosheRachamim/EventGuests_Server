@@ -7,7 +7,7 @@ var SERVER_PORT = 1337;
 //var SQL_User = "sa";
 //var SQL_Password = "123456";
 //var SQL_DB_Name = "wiselyev_wisely_app_sit";
-////prod
+//prod
 var SQL_URL = "81.218.117.73";
 var SQL_User = "wiselyev_wiselys";
 var SQL_Password = "KT{r#fI&fv9c";
@@ -226,9 +226,9 @@ router.route('/bulkupdate/')
 
 	.post(function (req, res) {
 
-		if (!req.body.Items) 
+		if (!req.body.Items)
 			return;
-		
+
 		res.writeHead(200, { 'Content-Type': 'text/plain' });
 		//console.log(getTimeOfDay(req.body.LastUpdateDate));
 		var sb = new StringBuilder();
@@ -412,6 +412,29 @@ process.on('exit', function () {
 		}
 	});
 
+});
+
+process.on('uncaughtException', function (err) {
+	// MySql Handle
+	if (!proxyUrl) {
+		return;
+	}
+	console.log(JSON.stringify(err));
+	//if ('code' in err) {
+	//	if (err.code === 'ECONNREFUSED') {
+
+	//		//-Recreate the pool.
+	//		connPool = mysql.createPool({
+	//			connectionLimit: SQLMAXCONNECTIONS,
+	//			host: SQL_URL,
+	//			user: SQL_User,
+	//			password: SQL_Password,
+	//			database: SQL_DB_Name,
+	//			stream: proxyConnection,
+	//			multipleStatements: true,
+	//		});
+	//	}
+	//}
 });
 
 // START THE SERVER
