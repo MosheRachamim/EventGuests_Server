@@ -419,7 +419,7 @@ process.on('uncaughtException', function (err) {
 	if (!proxyUrl) {
 		return;
 	}
-	console.log(JSON.stringify(err));
+	console.log('unhandled: '+ JSON.stringify(err));
 	//if ('code' in err) {
 	//	if (err.code === 'ECONNREFUSED') {
 
