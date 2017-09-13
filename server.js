@@ -2,8 +2,9 @@
 //consts.
 var SQLMAXCONNECTIONS = 90;
 var SERVER_PORT = 1337;
+var USE_DBPoolDefault = true;
 //dev
-//var SQL_URL = "212.179.232.90";
+//var SQL_URL = "localhost";
 //var SQL_User = "sa";
 //var SQL_Password = "123456";
 //var SQL_DB_Name = "wiselyev_wisely_app_sit";
@@ -21,6 +22,7 @@ var mysql = require('mysql2');
 var soap = require('soap');
 var url = require('url');
 var proxyUrl = process.env.QUOTAGUARDSTATIC_URL;
+var Use_DBPool = !proxyUrl || process.env.UseDBPool || USE_DBPoolDefault;
 var moment = require('moment-timezone');
 var StringBuilder = require('string-builder');
 
@@ -45,19 +47,32 @@ if (proxyUrl) {
 		pass: pass,
 	});
 
-	connPool = mysql.createPool({
-		connectionLimit: SQLMAXCONNECTIONS,
-		host: SQL_URL,
-		user: SQL_User,
-		password: SQL_Password,
-		database: SQL_DB_Name,
-		stream: proxyConnection,
-		multipleStatements: true,
-	});
+	if (Use_DBPool) {
 
-	console.log('connection made to db (' + SQL_URL + ') via Proxy');
+		connPool = mysql.createPool({
+			connectionLimit: SQLMAXCONNECTIONS,
+			host: SQL_URL,
+			user: SQL_User,
+			password: SQL_Password,
+			database: SQL_DB_Name,
+			stream: proxyConnection,
+			multipleStatements: true,
+		});
+
+		connPool.on('connection', function (connection) {
+
+			console.log("Pool- new connection created");
+		});
+
+		console.log('connection made to db via pool against (' + SQL_URL + ') via Proxy');
+
+	} else {
+
+		console.log('working w/out connection pool against url: ' + SQL_URL);
+	}
 }
 else {
+
 	connPool = mysql.createPool({
 		connectionLimit: SQLMAXCONNECTIONS,
 		host: SQL_URL,
@@ -67,7 +82,13 @@ else {
 		multipleStatements: true,
 	});
 
-	console.log('connection made to db (' + SQL_URL + ') directly');
+	connPool.on('connection', function (connection) {
+
+		console.log("Pool- new connection created");
+	});
+
+	console.log('connection made to db via pool against (' + SQL_URL + ') directly');
+
 }
 
 // configure app to use bodyParser()
@@ -93,20 +114,81 @@ function logError(err, location) {
 	console.log(dateNow + " - " + location + " - " + err);
 
 }
+
+function createConnection() {
+
+	mysql.createConnection({
+
+		host: SQL_URL,
+		user: SQL_User,
+		password: SQL_Password,
+		database: SQL_DB_Name,
+		stream: proxyConnection,
+		multipleStatements: true
+	});
+}
+
+function closeConnection(conn) {
+
+	if (conn) {
+
+		// Close the connection
+		conn.end(function () {
+			console.log("sql connection closed");
+
+			// The connection has been closed
+		});
+	}
+	
+}
 //api get view event
 router.get('/view', function (req, res) {
 	res.writeHead(200, { 'Content-Type': 'text/plain' });
 
-	connPool.query("SELECT * FROM events", function (err, result, fields) {
-		if (err) {
-			logError(err, "/view");
-			res.end("Error " + err);
-			return;
-			//throw err;
-		}
-		//console.log(JSON.stringify(result));
-		res.end(JSON.stringify(result[0]));
-	});
+	if (Use_DBPool) {
+
+		connPool.query("SELECT * FROM events", function (err, result, fields) {
+			if (err) {
+				logError(err, "/view");
+				res.end("Error " + err);
+				return;
+				//throw err;
+			}
+			//console.log(JSON.stringify(result));
+			res.end(JSON.stringify(result[0]));
+		});
+	} else {
+
+
+		// Creates connection object.
+		var conn = createConnection();
+
+		// connect to mysql
+		conn.connect(function (err) {
+			// in case of error
+			if (err) {
+				logError(err, "/view");
+				res.end("Error while establishing sql connection: " + err);
+				return;
+				//throw err;
+			}
+			console.log("sql connection established");
+		});
+
+		// Perform a query
+		conn.query('SELECT * FROM events', function (err, result, fields) {
+			if (err) {
+				logError(err, "/view");
+				res.end("Error " + err);
+				closeConnection(conn);
+				return;
+			}
+
+			res.end(JSON.stringify(result[0]));
+			console.log("sql query performed successully");
+			closeConnection(conn);
+		});
+	}
 
 });
 //api get sms templates event
@@ -414,28 +496,28 @@ process.on('exit', function () {
 
 });
 
-process.on('uncaughtException', function (err) {
-	// MySql Handle
-	if (!proxyUrl) {
-		return;
-	}
-	console.log('unhandled: '+ JSON.stringify(err));
-	//if ('code' in err) {
-	//	if (err.code === 'ECONNREFUSED') {
+//process.on('uncaughtException', function (err) {
+//	// MySql Handle
+//	if (!proxyUrl) {
+//		return;
+//	}
+//	console.log('unhandled: '+ JSON.stringify(err));
+//	//if ('code' in err) {
+//	//	if (err.code === 'ECONNREFUSED') {
 
-	//		//-Recreate the pool.
-	//		connPool = mysql.createPool({
-	//			connectionLimit: SQLMAXCONNECTIONS,
-	//			host: SQL_URL,
-	//			user: SQL_User,
-	//			password: SQL_Password,
-	//			database: SQL_DB_Name,
-	//			stream: proxyConnection,
-	//			multipleStatements: true,
-	//		});
-	//	}
-	//}
-});
+//	//		//-Recreate the pool.
+//	//		connPool = mysql.createPool({
+//	//			connectionLimit: SQLMAXCONNECTIONS,
+//	//			host: SQL_URL,
+//	//			user: SQL_User,
+//	//			password: SQL_Password,
+//	//			database: SQL_DB_Name,
+//	//			stream: proxyConnection,
+//	//			multipleStatements: true,
+//	//		});
+//	//	}
+//	//}
+//});
 
 // START THE SERVER
 // =============================================================================
