@@ -27,6 +27,7 @@ var moment = require('moment-timezone');
 var StringBuilder = require('string-builder');
 
 var sms_url = 'http://www.smsapi.co.il/Web_API/SendSMS.asmx?wsdl';
+var proxyConnection;
 var connPool;
 if (proxyUrl) {
 
@@ -40,7 +41,7 @@ if (proxyUrl) {
 		username = auth.split(':')[0],
 		pass = auth.split(':')[1];
 
-	const proxyConnection = new SocksConnection(mysqlServer, {
+	proxyConnection = new SocksConnection(mysqlServer, {
 		host: proxy.hostname,
 		port: 1080,
 		user: username,
