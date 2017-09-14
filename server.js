@@ -162,7 +162,15 @@ router.get('/view', function (req, res) {
 
 
 		// Creates connection object.
-		var conn = createConnection();
+		var conn = mysql.createConnection({
+
+			host: SQL_URL,
+			user: SQL_User,
+			password: SQL_Password,
+			database: SQL_DB_Name,
+			stream: proxyConnection,
+			multipleStatements: true
+		});
 
 		// connect to mysql
 		conn.connect(function (err) {
@@ -181,13 +189,29 @@ router.get('/view', function (req, res) {
 			if (err) {
 				logError(err, "/view");
 				res.end("Error " + err);
-				closeConnection(conn);
+				if (conn) {
+
+					// Close the connection
+					conn.end(function () {
+						console.log("sql connection closed");
+
+						// The connection has been closed
+					});
+				}
 				return;
 			}
 
 			res.end(JSON.stringify(result[0]));
 			console.log("sql query performed successully");
-			closeConnection(conn);
+			if (conn) {
+
+				// Close the connection
+				conn.end(function () {
+					console.log("sql connection closed");
+
+					// The connection has been closed
+				});
+			}
 		});
 	}
 
