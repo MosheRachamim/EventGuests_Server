@@ -118,7 +118,7 @@ function logError(err, location) {
 
 function createConnection() {
 
-	mysql.createConnection({
+	return mysql.createConnection({
 
 		host: SQL_URL,
 		user: SQL_User,
@@ -140,7 +140,7 @@ function closeConnection(conn) {
 			// The connection has been closed
 		});
 	}
-	
+
 }
 //api get view event
 router.get('/view', function (req, res) {
