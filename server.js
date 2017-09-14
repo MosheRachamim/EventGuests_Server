@@ -22,7 +22,7 @@ var mysql = require('mysql2');
 var soap = require('soap');
 var url = require('url');
 var proxyUrl = process.env.QUOTAGUARDSTATIC_URL;
-var Use_DBPool = !proxyUrl || process.env.UseDBPool || USE_DBPoolDefault;
+var Use_DBPool = !proxyUrl || (process.env.Use_DBPool && USE_DBPoolDefault);
 var moment = require('moment-timezone');
 var StringBuilder = require('string-builder');
 
