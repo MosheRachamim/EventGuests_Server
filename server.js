@@ -1,6 +1,6 @@
 'use strict';
 //consts.
-var SQLMAXCONNECTIONS = 90;
+var SQLMAXCONNECTIONS = 15;
 var SERVER_PORT = 1337;
 var USE_DBPoolDefault = true;
 //dev
@@ -58,6 +58,8 @@ if (proxyUrl) {
 			database: SQL_DB_Name,
 			stream: proxyConnection,
 			multipleStatements: true,
+			acquireTimeout: 90000,
+			queueLimit: 30
 		});
 
 		connPool.on('connection', function (connection) {
@@ -81,6 +83,8 @@ else {
 		password: SQL_Password,
 		database: SQL_DB_Name,
 		multipleStatements: true,
+		acquireTimeout: 90000,
+		queueLimit: 30
 	});
 
 	connPool.on('connection', function (connection) {
