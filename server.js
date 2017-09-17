@@ -77,12 +77,6 @@ if (proxyUrl) {
 	}
 }
 else {
-	proxyConnection = new SocksConnection(mysqlServer, {
-		host: proxy.hostname,
-		port: 1080,
-		user: username,
-		pass: pass,
-	});
 	connPool = mysql.createPool({
 		connectionLimit: SQLMAXCONNECTIONS,
 		host: SQL_URL,
@@ -115,6 +109,13 @@ function handleDBError(err, location) {
 function handleDisconnect() {
 	if (Use_DBPool) {
 
+		log.console('db connection restarting...');
+		proxyConnection = new SocksConnection(mysqlServer, {
+			host: proxy.hostname,
+			port: 1080,
+			user: username,
+			pass: pass,
+		});
 		connPool = mysql.createPool({
 			connectionLimit: SQLMAXCONNECTIONS,
 			host: SQL_URL,
@@ -126,6 +127,7 @@ function handleDisconnect() {
 			acquireTimeout: 90000,
 			queueLimit: 30
 		});
+		log.console('db connection restarted');
 
 	}
 }
