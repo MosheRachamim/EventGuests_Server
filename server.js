@@ -47,7 +47,7 @@ if (proxyUrl) {
 		host: proxy.hostname,
 		port: 1080,
 		user: username,
-		pass: pass,
+		pass: pass,                             
 	});
 
 	if (Use_DBPool) {
@@ -99,6 +99,7 @@ else {
 
 function handleDBError(err, location) {
 
+	log.console('handleDBError');
 	if (Use_DBPool) {
 
 		handleDisconnect();
@@ -107,6 +108,7 @@ function handleDBError(err, location) {
 
 }
 function handleDisconnect() {
+	log.console('handleDisconnect');
 	if (Use_DBPool) {
 
 		log.console('db connection restarting...');
