@@ -100,11 +100,11 @@ else {
 function handleDBError(err, location) {
 
 	console.log('handleDBError');
+	logError(err, location + ' - ' + err.code);
 	if (Use_DBPool) {
 
 		handleDisconnect();
 	}
-	logError(err, location + ' - ' + err.code);
 
 }
 function handleDisconnect() {
