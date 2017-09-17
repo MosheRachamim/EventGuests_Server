@@ -75,7 +75,12 @@ if (proxyUrl) {
 	}
 }
 else {
-
+	proxyConnection = new SocksConnection(mysqlServer, {
+		host: proxy.hostname,
+		port: 1080,
+		user: username,
+		pass: pass,
+	});
 	connPool = mysql.createPool({
 		connectionLimit: SQLMAXCONNECTIONS,
 		host: SQL_URL,
