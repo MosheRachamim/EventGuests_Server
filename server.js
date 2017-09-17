@@ -33,13 +33,12 @@ const mysqlServer = {
 	port: 3306
 };
 
-var proxy;
 var proxyConnection;
 var connPool;
 if (proxyUrl) {
 
 
-	proxy = url.parse(process.env.QUOTAGUARDSTATIC_URL),
+	var proxy = url.parse(process.env.QUOTAGUARDSTATIC_URL),
 		auth = proxy.auth,
 		username = auth.split(':')[0],
 		pass = auth.split(':')[1];
@@ -111,6 +110,11 @@ function handleDisconnect() {
 	if (Use_DBPool) {
 
 		log.console('db connection restarting...');
+		var proxy = url.parse(process.env.QUOTAGUARDSTATIC_URL),
+			auth = proxy.auth,
+			username = auth.split(':')[0],
+			pass = auth.split(':')[1];
+
 		proxyConnection = new SocksConnection(mysqlServer, {
 			host: proxy.hostname,
 			port: 1080,
