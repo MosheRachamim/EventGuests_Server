@@ -27,14 +27,16 @@ var moment = require('moment-timezone');
 var StringBuilder = require('string-builder');
 
 var sms_url = 'http://www.smsapi.co.il/Web_API/SendSMS.asmx?wsdl';
+
+const mysqlServer = {
+	host: SQL_URL,
+	port: 3306
+};
+
 var proxyConnection;
 var connPool;
 if (proxyUrl) {
 
-	const mysqlServer = {
-		host: SQL_URL,
-		port: 3306
-	};
 
 	var proxy = url.parse(process.env.QUOTAGUARDSTATIC_URL),
 		auth = proxy.auth,
