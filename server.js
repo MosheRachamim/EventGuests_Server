@@ -47,7 +47,7 @@ if (proxyUrl) {
 		host: proxy.hostname,
 		port: 1080,
 		user: username,
-		pass: pass,                             
+		pass: pass,
 	});
 
 	if (Use_DBPool) {
@@ -103,12 +103,12 @@ function handleDBError(err, location) {
 	logError(err, location + ' - ' + err.code);
 	if (Use_DBPool) {
 
-		handleDisconnect();
+		reconnectToDB();
 	}
 
 }
-function handleDisconnect() {
-	console.log('handleDisconnect');
+function reconnectToDB() {
+	console.log('reconnectToDB');
 	if (Use_DBPool) {
 
 		console.log('db connection restarting...');
@@ -189,6 +189,44 @@ function closeConnection(conn) {
 	}
 
 }
+
+//api get wakeup event
+router.get('/wakeup', function (req, res) {
+	res.writeHead(200, { 'Content-Type': 'text/plain' });
+
+	if (Use_DBPool) {
+
+		//-make dummy call to db.
+		connPool.query("SELECT * FROM events",
+			function (err, result, fields) {
+				if (err) {
+					//-in case error force reconnect.
+					reconnectToDB();
+
+					//-then try again.
+					connPool.query("SELECT * FROM events",
+						function (err, result, fields) {
+							if (err) {
+
+								//throw if fail.
+								console.log('Wakup DB error');
+								res.end('DB Error');
+								return;
+							}
+
+							//-send response ok.
+							res.end('DB OK 1');
+						});
+
+				}
+
+				//-send response ok.
+				res.end('DB OK 2');
+			});
+
+	}
+});
+
 //api get view event
 router.get('/view', function (req, res) {
 	res.writeHead(200, { 'Content-Type': 'text/plain' });
