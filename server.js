@@ -99,7 +99,7 @@ else {
 
 function handleDBError(err, location) {
 
-	log.console('handleDBError');
+	console.log('handleDBError');
 	if (Use_DBPool) {
 
 		handleDisconnect();
@@ -108,10 +108,10 @@ function handleDBError(err, location) {
 
 }
 function handleDisconnect() {
-	log.console('handleDisconnect');
+	console.log('handleDisconnect');
 	if (Use_DBPool) {
 
-		log.console('db connection restarting...');
+		console.log('db connection restarting...');
 		var proxy = url.parse(process.env.QUOTAGUARDSTATIC_URL),
 			auth = proxy.auth,
 			username = auth.split(':')[0],
@@ -134,7 +134,7 @@ function handleDisconnect() {
 			acquireTimeout: 90000,
 			queueLimit: 30
 		});
-		log.console('db connection restarted');
+		console.log('db connection restarted');
 
 	}
 }
