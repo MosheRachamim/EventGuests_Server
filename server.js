@@ -96,6 +96,33 @@ else {
 
 }
 
+function handleDBError(err, location) {
+
+	if (Use_DBPool) {
+
+		handleDisconnect();
+	}
+	logError(err, location + ' - ' + err.code);
+
+}
+function handleDisconnect() {
+	if (Use_DBPool) {
+
+		connPool = mysql.createPool({
+			connectionLimit: SQLMAXCONNECTIONS,
+			host: SQL_URL,
+			user: SQL_User,
+			password: SQL_Password,
+			database: SQL_DB_Name,
+			stream: proxyConnection,
+			multipleStatements: true,
+			acquireTimeout: 90000,
+			queueLimit: 30
+		});
+
+	}
+}
+
 // configure app to use bodyParser()
 // this will let us get the data from a POST
 app.use(bodyParser.json({ limit: '50mb' }));
@@ -180,7 +207,7 @@ router.get('/view', function (req, res) {
 		conn.connect(function (err) {
 			// in case of error
 			if (err) {
-				logError(err, "/view");
+				handleDBError(err, "/view");
 				res.end("Error while establishing sql connection: " + err);
 				return;
 				//throw err;
