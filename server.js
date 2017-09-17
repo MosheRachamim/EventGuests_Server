@@ -197,7 +197,7 @@ router.get('/view', function (req, res) {
 
 		connPool.query("SELECT * FROM events", function (err, result, fields) {
 			if (err) {
-				logError(err, "/view");
+				handleDBError(err, "/view");
 				res.end("Error " + err);
 				return;
 				//throw err;
