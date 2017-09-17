@@ -215,13 +215,13 @@ router.get('/wakeup', function (req, res) {
 							}
 
 							//-send response ok.
-							res.end('DB OK 1');
+							res.end('DB OK 2');
 						});
 
 				}
 
 				//-send response ok.
-				res.end('DB OK 2');
+				res.end('DB OK 1');
 			});
 
 	}
