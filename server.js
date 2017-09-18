@@ -217,7 +217,7 @@ router.get('/wakeup', function (req, res) {
 							//-send response ok.
 							res.end('DB OK 2');
 						});
-
+					return;
 				}
 
 				//-send response ok.
