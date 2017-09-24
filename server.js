@@ -274,11 +274,11 @@ router.get('/view2', function (req, res) {
 		connPool.query("SELECT * FROM events", function (err, result, fields) {
 			if (err) {
 				logError(err, "/view2");
-				if (req.params.autoWakeup) {
+				if (req.query.autoWakeup == 'true') {
 
 					//-reconnect to db.
 					reconnectToDB();
-					 
+
 					//-perform the query (after reconnect)
 					connPool.query("SELECT * FROM events", function (err, result, fields) {
 						if (err) {
