@@ -272,6 +272,13 @@ router.get('/view2', function (req, res) {
 	if (Use_DBPool) {
 
 		connPool.query("SELECT * FROM events", function (err, result, fields) {
+			if (req.query.autoWakeup == 'true') {
+				console.log('test1 ' + 1 + ' - ' + req.query.autoWakeup);
+
+			} else {
+				console.log('test1 ' + 2 + ' - ' + req.query.autoWakeup);
+				
+			}
 			if (err) {
 				logError(err, "/view2");
 				if (req.query.autoWakeup == 'true') {
