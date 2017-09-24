@@ -1,18 +1,18 @@
 'use strict';
 //consts.
-var SQLMAXCONNECTIONS = 15;
+var SQLMAXCONNECTIONS = 90;
 var SERVER_PORT = 1337;
 var USE_DBPoolDefault = true;
 //dev
-//var SQL_URL = "localhost";
-//var SQL_User = "sa";
-//var SQL_Password = "123456";
-//var SQL_DB_Name = "wiselyev_wisely_app_sit";
-//prod
-var SQL_URL = "81.218.117.73";
-var SQL_User = "wiselyev_wiselys";
-var SQL_Password = "sdasAA@$#FDSDFS";
+var SQL_URL = "localhost";
+var SQL_User = "sa";
+var SQL_Password = "123456";
 var SQL_DB_Name = "wiselyev_wisely_app_sit";
+//prod
+//var SQL_URL = "81.218.117.73";
+//var SQL_User = "wiselyev_wiselys";
+//var SQL_Password = "sdasAA@$#FDSDFS";
+//var SQL_DB_Name = "wiselyev_wisely_app_sit";
 
 var express = require('express');
 var app = express();
@@ -60,8 +60,8 @@ if (proxyUrl) {
 			database: SQL_DB_Name,
 			stream: proxyConnection,
 			multipleStatements: true,
-			acquireTimeout: 90000,
-			queueLimit: 30
+			queueLimit: 30,
+			acquireTimeout: 90000
 		});
 
 		connPool.on('connection', function (connection) {
@@ -77,6 +77,7 @@ if (proxyUrl) {
 	}
 }
 else {
+
 	connPool = mysql.createPool({
 		connectionLimit: SQLMAXCONNECTIONS,
 		host: SQL_URL,
@@ -84,8 +85,8 @@ else {
 		password: SQL_Password,
 		database: SQL_DB_Name,
 		multipleStatements: true,
-		acquireTimeout: 90000,
-		queueLimit: 30
+		queueLimit: 30,
+		acquireTimeout: 90000
 	});
 
 	connPool.on('connection', function (connection) {
@@ -97,16 +98,6 @@ else {
 
 }
 
-function handleDBError(err, location) {
-
-	console.log('handleDBError');
-	logError(err, location + ' - ' + err.code);
-	if (Use_DBPool) {
-
-		reconnectToDB();
-	}
-
-}
 function reconnectToDB() {
 	console.log('reconnectToDB');
 	if (Use_DBPool) {
@@ -163,32 +154,6 @@ function logError(err, location) {
 
 }
 
-function createConnection() {
-
-	return mysql.createConnection({
-
-		host: SQL_URL,
-		user: SQL_User,
-		password: SQL_Password,
-		database: SQL_DB_Name,
-		stream: proxyConnection,
-		multipleStatements: true
-	});
-}
-
-function closeConnection(conn) {
-
-	if (conn) {
-
-		// Close the connection
-		conn.end(function () {
-			console.log("sql connection closed");
-
-			// The connection has been closed
-		});
-	}
-
-}
 
 //api get wakeup event
 router.get('/wakeup', function (req, res) {
@@ -235,12 +200,10 @@ router.get('/view', function (req, res) {
 
 		connPool.query("SELECT * FROM events", function (err, result, fields) {
 			if (err) {
-				handleDBError(err, "/view");
+				logError(err, "/view");
 				res.end("Error " + err);
 				return;
-				//throw err;
 			}
-			//console.log(JSON.stringify(result));
 			res.end(JSON.stringify(result[0]));
 		});
 	} else {
@@ -261,7 +224,7 @@ router.get('/view', function (req, res) {
 		conn.connect(function (err) {
 			// in case of error
 			if (err) {
-				handleDBError(err, "/view");
+				logError(err, "/view");
 				res.end("Error while establishing sql connection: " + err);
 				return;
 				//throw err;
@@ -301,6 +264,97 @@ router.get('/view', function (req, res) {
 	}
 
 });
+
+//api get view2 event
+router.get('/view2', function (req, res) {
+	res.writeHead(200, { 'Content-Type': 'text/plain' });
+
+	if (Use_DBPool) {
+
+		connPool.query("SELECT * FROM events", function (err, result, fields) {
+			if (err) {
+				logError(err, "/view");
+				if (req.params.autoWakeup) {
+
+					//-reconnect to db.
+					reconnectToDB();
+
+					//-perform the query (after reconnect)
+					connPool.query("SELECT * FROM events", function (err, result, fields) {
+						if (err) {
+							logError(err, "/view reconnect");
+							res.end("Error " + err);
+							return;
+						}
+						res.end(JSON.stringify(result[0]));
+					});
+				} else {
+
+					res.end("Error " + err);
+				}
+				return;
+			}
+			res.end(JSON.stringify(result[0]));
+		});
+	} else {
+
+
+		// Creates connection object.
+		var conn = mysql.createConnection({
+
+			host: SQL_URL,
+			user: SQL_User,
+			password: SQL_Password,
+			database: SQL_DB_Name,
+			stream: proxyConnection,
+			multipleStatements: true
+		});
+
+		// connect to mysql
+		conn.connect(function (err) {
+			// in case of error
+			if (err) {
+				logError(err, "/view");
+				res.end("Error while establishing sql connection: " + err);
+				return;
+				//throw err;
+			}
+			console.log("sql connection established");
+		});
+
+		// Perform a query
+		conn.query('SELECT * FROM events', function (err, result, fields) {
+			if (err) {
+				logError(err, "/view");
+				res.end("Error " + err);
+				if (conn) {
+
+					// Close the connection
+					conn.end(function () {
+						console.log("sql connection closed");
+
+						// The connection has been closed
+					});
+				}
+				return;
+			}
+
+			res.end(JSON.stringify(result[0]));
+			console.log("sql query performed successully");
+			if (conn) {
+
+				// Close the connection
+				conn.end(function () {
+					console.log("sql connection closed");
+
+					// The connection has been closed
+				});
+			}
+		});
+	}
+
+});
+
 //api get sms templates event
 router.get('/get_sms_templates', function (req, res) {
 	res.writeHead(200, { 'Content-Type': 'text/plain' });
