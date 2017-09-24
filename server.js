@@ -4,15 +4,15 @@ var SQLMAXCONNECTIONS = 90;
 var SERVER_PORT = 1337;
 var USE_DBPoolDefault = true;
 //dev
-var SQL_URL = "localhost";
-var SQL_User = "sa";
-var SQL_Password = "123456";
-var SQL_DB_Name = "wiselyev_wisely_app_sit";
-//prod
-//var SQL_URL = "81.218.117.73";
-//var SQL_User = "wiselyev_wiselys";
-//var SQL_Password = "sdasAA@$#FDSDFS";
+//var SQL_URL = "localhost";
+//var SQL_User = "sa";
+//var SQL_Password = "123456";
 //var SQL_DB_Name = "wiselyev_wisely_app_sit";
+//prod
+var SQL_URL = "81.218.117.73";
+var SQL_User = "wiselyev_wiselys";
+var SQL_Password = "sdasAA@$#FDSDFS";
+var SQL_DB_Name = "wiselyev_wisely_app_sit";
 
 var express = require('express');
 var app = express();
