@@ -21,7 +21,6 @@ var mysql = require('mysql2');
 var soap = require('soap');
 var url = require('url');
 var proxyUrl = process.env.QUOTAGUARDSTATIC_URL;
-var clientTimeOffSet = process.env.CLIENTTIMEOFFSET || "+0300";
 var moment = require('moment-timezone');
 var StringBuilder = require('string-builder');
 
@@ -32,6 +31,7 @@ const mysqlServer = {
   port: 3306
 };
 
+var clientTimeOffSet;
 var proxyConnection;
 var connPool;
 if (proxyUrl) {
@@ -64,14 +64,7 @@ if (proxyUrl) {
     dateStrings: "DATETIME"
   });
 
-  connPool.on('connection', function (connection) {
-
-    console.log("Pool- new connection created");
-  });
-
   console.log('connection made to db via pool against (' + SQL_URL + ') via Proxy');
-
-
 }
 else {
 
@@ -89,14 +82,30 @@ else {
     dateStrings: "DATETIME"
   });
 
-  connPool.on('connection', function (connection) {
-
-    console.log("Pool- new connection created");
-  });
 
   console.log('connection made to db via pool against (' + SQL_URL + ') directly');
-
 }
+
+//registers to pool's OnConnection event.
+connPool.on('connection', function (connection) {
+
+  console.log("Pool- new connection created");
+});
+
+//capture timezone of the db server.
+var GetSQLTimeZoneOffset = function () {
+  connPool.query("select timediff(now(),convert_tz(now(),@@session.time_zone,'+00:00')) as val",
+    function (err, result, fields) {
+      if (err) {
+
+        throw err; //Note: Throws from app if fails.
+      }
+
+      clientTimeOffSet = "+" + result[0].val;
+      console.log("Timezone offset = " + clientTimeOffSet);
+    });
+}();
+
 
 function reconnectToDB() {
 
@@ -453,7 +462,7 @@ function getTimeOfDayWithOffset(dateTime) {
 
     /*GLOBAL clientTimeOffSet*/
     var datetimeUTC = new moment(dateTime).zone(clientTimeOffSet).format("HH:mm:ss");
-    console.log(datetimeUTC);
+    //console.log(datetimeUTC);
 
     return datetimeUTC;
   }
