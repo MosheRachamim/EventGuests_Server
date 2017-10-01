@@ -434,7 +434,7 @@ function getTimeOfDay(dateTime) {
 
   if (dateTime != null) {
 
-    var datetimeUTC = new moment(dateTime).format("HH:mm:ss");
+    var datetimeUTC = new moment(dateTime).form.format("HH:mm:ss +-HHmm");
 
     return datetimeUTC;
   }
