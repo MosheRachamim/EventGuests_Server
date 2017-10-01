@@ -21,6 +21,7 @@ var mysql = require('mysql2');
 var soap = require('soap');
 var url = require('url');
 var proxyUrl = process.env.QUOTAGUARDSTATIC_URL;
+var clientTimeOffSet = process.env.CLIENTTIMEOFFSET || "+0300";
 var moment = require('moment-timezone');
 var StringBuilder = require('string-builder');
 
@@ -59,7 +60,7 @@ if (proxyUrl) {
     queueLimit: 0,
     connectTimeout: 90000,
     acquireTimeout: 90000,
-    timezone: "utc+0300",
+    timezone: "utc" + clientTimeOffSet,
     dateStrings: "DATETIME"
   });
 
@@ -84,7 +85,7 @@ else {
     queueLimit: 0,
     connectTimeout: 90000,
     acquireTimeout: 90000,
-    timezone: "utc+0300",
+    timezone: "utc" + clientTimeOffSet,
     dateStrings: "DATETIME"
   });
 
@@ -123,7 +124,7 @@ function reconnectToDB() {
     queueLimit: 0,
     connectTimeout: 90000,
     acquireTimeout: 90000,
-    timezone: "utc+0300",
+    timezone: "utc" + clientTimeOffSet,
     dateStrings: "DATETIME"
   });
   console.log('db connection restarted');
@@ -320,7 +321,7 @@ router.route('/update/:guest_id')
     //console.log(getTimeOfDay(req.body.LastUpdateDate));
     //update db
     var lQuery = "Update guests set " +
-      " new_handled_by=" + connPool.escape(req.body.HandledBy) + ", new_arrival_time ='" + getTimeOfDay(req.body.LastUpdateDate) +
+      " new_handled_by=" + connPool.escape(req.body.HandledBy) + ", new_arrival_time ='" + getTimeOfDayWithOffset(req.body.LastUpdateDate) +
       "', new_num_guests=" + req.body.NumOfGuestsAttending + ", num_guests=" + req.body.NumOfGuestsApproved +
       ", Name=" + connPool.escape(req.body.Name) + ", phone =" + connPool.escape(req.body.PhoneNumber) +
       ", category =" + connPool.escape(req.body.Group) + ", side =" + connPool.escape(req.body.WeddingSide) +
@@ -378,7 +379,7 @@ router.route('/bulkupdate/')
     for (var i = 0; i < req.body.Items.length; i++) {
       var guest = req.body.Items[i];
       var lQueryOne = "Update guests set " +
-        " new_handled_by=" + connPool.escape(guest.HandledBy) + ", new_arrival_time ='" + getTimeOfDay(guest.LastUpdateDate) +
+        " new_handled_by=" + connPool.escape(guest.HandledBy) + ", new_arrival_time ='" + getTimeOfDayWithOffset(guest.LastUpdateDate) +
         "', new_num_guests=" + guest.NumOfGuestsAttending + ", num_guests=" + guest.NumOfGuestsApproved +
         ", Name=" + connPool.escape(guest.Name) + ", phone =" + connPool.escape(guest.PhoneNumber) +
         ", category =" + connPool.escape(guest.Group) + ", side =" + connPool.escape(guest.WeddingSide) +
@@ -429,12 +430,13 @@ router.route('/bulkupdate/')
 
   });
 
-//helper function: convert datetime value to time
+//helper function: convert datetime value to time only.
 function getTimeOfDay(dateTime) {
 
   if (dateTime != null) {
 
-    var datetimeUTC = new moment(dateTime).tz("+0300").format("HH:mm:ss");
+    /*GLOBAL clientTimeOffSet*/
+    var datetimeUTC = new moment(dateTime).format("HH:mm:ss");
     console.log(datetimeUTC);
 
     return datetimeUTC;
@@ -443,6 +445,23 @@ function getTimeOfDay(dateTime) {
     return null;
   }
 }
+
+//helper function: convert datetime value to time only, in the client time offset.
+function getTimeOfDayWithOffset(dateTime) {
+
+  if (dateTime != null) {
+
+    /*GLOBAL clientTimeOffSet*/
+    var datetimeUTC = new moment(dateTime).tz(clientTimeOffSet).format("HH:mm:ss");
+    console.log(datetimeUTC);
+
+    return datetimeUTC;
+  }
+  else {
+    return null;
+  }
+}
+
 
 router.route('/sendStatsSms/')
 
