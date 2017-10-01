@@ -452,9 +452,7 @@ function getTimeOfDayWithOffset(dateTime) {
   if (dateTime != null) {
 
     /*GLOBAL clientTimeOffSet*/
-    var datetimeUTC = new moment(dateTime).tz(clientTimeOffSet).format("HH:mm:ss");
-    console.log(dateTime);
-    console.log(clientTimeOffSet);
+    var datetimeUTC = new moment(dateTime).zone(clientTimeOffSet).format("HH:mm:ss");
     console.log(datetimeUTC);
 
     return datetimeUTC;
