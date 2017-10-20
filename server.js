@@ -1,6 +1,6 @@
 'use strict';
 //consts.
-var SQLMAXCONNECTIONS = 90;
+//var SQLMAXCONNECTIONS = 90;
 //wiselyevents:
 var SERVER_PORT = 1337;    //only relevant for local-hosting.
 //leilot-ksumim:
@@ -60,16 +60,16 @@ if (proxyUrl) {
   });
 
   connPool = mysql.createPool({
-    connectionLimit: SQLMAXCONNECTIONS,
+    //connectionLimit: SQLMAXCONNECTIONS,
     host: SQL_URL,
     user: SQL_User,
     password: SQL_Password,
     database: SQL_DB_Name,
     stream: proxyConnection,
     multipleStatements: true,
-    queueLimit: 0,
-    connectTimeout: 90000,
-    acquireTimeout: 90000,
+    connectTimeout: 30000,
+    acquireTimeout: 30000,
+    //queueLimit: 30,
     timezone: "utc" + clientTimeOffSet,
     dateStrings: "DATETIME"
   });
@@ -79,15 +79,15 @@ if (proxyUrl) {
 else {
 
   connPool = mysql.createPool({
-    connectionLimit: SQLMAXCONNECTIONS,
+    //connectionLimit: SQLMAXCONNECTIONS,
     host: SQL_URL,
     user: SQL_User,
     password: SQL_Password,
     database: SQL_DB_Name,
     multipleStatements: true,
-    queueLimit: 0,
-    connectTimeout: 90000,
-    acquireTimeout: 90000,
+    connectTimeout: 30000,
+    acquireTimeout: 30000,
+    //queueLimit: 30,
     timezone: "utc" + clientTimeOffSet,
     dateStrings: "DATETIME"
   });
@@ -134,16 +134,16 @@ function reconnectToDB() {
     pass: pass,
   });
   connPool = mysql.createPool({
-    connectionLimit: SQLMAXCONNECTIONS,
+    //connectionLimit: SQLMAXCONNECTIONS,
     host: SQL_URL,
     user: SQL_User,
     password: SQL_Password,
     database: SQL_DB_Name,
     stream: proxyConnection,
     multipleStatements: true,
-    queueLimit: 0,
-    connectTimeout: 90000,
-    acquireTimeout: 90000,
+    connectTimeout: 30000,
+    acquireTimeout: 30000,
+    //queueLimit: 30,
     timezone: "utc" + clientTimeOffSet,
     dateStrings: "DATETIME"
   });
