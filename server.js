@@ -338,7 +338,6 @@ router.route('/update/:guest_id')
 
   .post(function (req, res) {
     res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
-    //console.log(getTimeOfDay(req.body.LastUpdateDate));
     //update db
     var lQuery = "Update guests set " +
       " new_handled_by=" + connPool.escape(req.body.HandledBy) + ", new_arrival_time ='" + getTimeOfDayWithOffset(req.body.LastUpdateDate) +
@@ -397,7 +396,12 @@ router.route('/bulkupdate/')
     //console.log(getTimeOfDay(req.body.LastUpdateDate));
     var sb = new StringBuilder();
     for (var i = 0; i < req.body.Items.length; i++) {
+      //test
       var guest = req.body.Items[i];
+      if (proxyUrl && guest.HandledBy) {
+        console.log('test1 ' + guest.LastUpdateDate);
+        console.log('test2 ' + getTimeOfDayWithOffset(guest.LastUpdateDate));
+      }
       var lQueryOne = "Update guests set " +
         " new_handled_by=" + connPool.escape(guest.HandledBy) + ", new_arrival_time ='" + getTimeOfDayWithOffset(guest.LastUpdateDate) +
         "', new_num_guests=" + guest.NumOfGuestsAttending + ", num_guests=" + guest.NumOfGuestsApproved +
@@ -561,7 +565,7 @@ function getTimeOfDayWithOffset(dateTime) {
   if (dateTime != null) {
 
     /*GLOBAL clientTimeOffSet*/
-    var datetimeUTC = new moment(dateTime).zone(clientTimeOffSet).format("HH:mm:ss");
+    var datetimeUTC = new moment(dateTime).utcOffset(clientTimeOffSet).format("HH:mm:ss");
     //console.log(datetimeUTC);
 
     return datetimeUTC;
