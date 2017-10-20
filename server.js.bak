@@ -7,11 +7,17 @@ var SERVER_PORT = 1337;
 //var SQL_User = "sa";
 //var SQL_Password = "123456";
 //var SQL_DB_Name = "wiselyev_wisely_app_sit";
-//prod
-var SQL_URL = "81.218.117.73";
-var SQL_User = "wiselyev_wiselys";
-var SQL_Password = "sdasAA@$#FDSDFS";
-var SQL_DB_Name = "wiselyev_wisely_app_sit";
+//prod1 (default)
+var SQL_URL = process.env.DB_HOSTURL || "81.218.117.73";
+var SQL_User = process.env.DB_USER ||"wiselyev_wiselys";
+var SQL_Password = process.env.DB_PASSWORD ||"sdasAA@$#FDSDFS";
+var SQL_DB_Name = process.env.DB_SCHEMA_NAME || "wiselyev_wisely_app_sit";
+
+//prod2 (Dep2)
+//var SQL_URL = process.env.DB_HOSTURL || "81.218.117.73";
+//var SQL_User = process.env.DB_USER || "wiselyev_leilot_ksumim";
+//var SQL_Password = process.env.DB_PASSWORD || "leilot_ksfI!fv9c";
+//var SQL_DB_Name = process.env.DB_SCHEMA_NAME || "wiselyev_leilot_ksumim";
 
 var express = require('express');
 var app = express();
@@ -167,7 +173,7 @@ function logError(err, location) {
 
 //api get wakeup event
 router.get('/wakeup', function (req, res) {
-  res.writeHead(200, { 'Content-Type': 'text/plain' });
+  res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
 
   //-make dummy call to db.
   connPool.query("SELECT * FROM events",
@@ -201,7 +207,7 @@ router.get('/wakeup', function (req, res) {
 
 //api get view event
 router.get('/view', function (req, res) {
-  res.writeHead(200, { 'Content-Type': 'text/plain' });
+  res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
 
   connPool.query("SELECT * FROM events", function (err, result, fields) {
     if (err) {
@@ -233,7 +239,7 @@ router.get('/view', function (req, res) {
 
 //api get view2 event(legacy)
 router.get('/view2', function (req, res) {
-  res.writeHead(200, { 'Content-Type': 'text/plain' });
+  res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
 
   connPool.query("SELECT * FROM events", function (err, result, fields) {
     if (err) {
@@ -264,7 +270,7 @@ router.get('/view2', function (req, res) {
 
 //api get sms templates event
 router.get('/get_sms_templates', function (req, res) {
-  res.writeHead(200, { 'Content-Type': 'text/plain' });
+  res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
   connPool.query("SELECT * FROM sms_templates", function (err, result, fields) {
     if (err) logError(err, "/get_sms_templates"); //throw err;
     //console.log(result);
@@ -275,7 +281,7 @@ router.get('/get_sms_templates', function (req, res) {
 
 //api get sms credit
 router.get('/get_sms_credits', function (req, res) {
-  res.writeHead(200, { 'Content-Type': 'text/plain' });
+  res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
 
   soap.createClient(sms_url, function (err, client) {
     if (err) {
@@ -307,7 +313,7 @@ router.get('/get_sms_credits', function (req, res) {
 //api get all guests
 router.get('/all', function (req, res) {
 
-  res.writeHead(200, { 'Content-Type': 'text/plain' });
+  res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
   connPool.query("SELECT * FROM guests", function (err, result, fields) {
     if (err) {
       logError(err, "/all");;
@@ -326,7 +332,7 @@ router.get('/all', function (req, res) {
 router.route('/update/:guest_id')
 
   .post(function (req, res) {
-    res.writeHead(200, { 'Content-Type': 'text/plain' });
+    res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
     //console.log(getTimeOfDay(req.body.LastUpdateDate));
     //update db
     var lQuery = "Update guests set " +
@@ -382,7 +388,7 @@ router.route('/bulkupdate/')
     if (!req.body.Items)
       return;
 
-    res.writeHead(200, { 'Content-Type': 'text/plain' });
+    res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
     //console.log(getTimeOfDay(req.body.LastUpdateDate));
     var sb = new StringBuilder();
     for (var i = 0; i < req.body.Items.length; i++) {
@@ -475,7 +481,7 @@ function getTimeOfDayWithOffset(dateTime) {
 router.route('/sendStatsSms/')
 
   .post(function (req, res) {
-    res.writeHead(200, { 'Content-Type': 'text/plain' });
+    res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
 
     soap.createClient(sms_url, function (err, client) {
       if (err) {
@@ -505,7 +511,7 @@ router.route('/sendStatsSms/')
 router.route('/sendAttendingSms/')
 
   .post(function (req, res) {
-    res.writeHead(200, { 'Content-Type': 'text/plain' });
+    res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
 
     soap.createClient(sms_url, function (err, client) {
       if (err) {
@@ -536,7 +542,7 @@ router.route('/sendAttendingSms/')
 router.route('/sendMissingGuestsSms/')
 
   .post(function (req, res) {
-    res.writeHead(200, { 'Content-Type': 'text/plain' });
+    res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
 
     soap.createClient(sms_url, function (err, client) {
       if (err) {

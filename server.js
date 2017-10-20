@@ -1,7 +1,10 @@
 'use strict';
 //consts.
 var SQLMAXCONNECTIONS = 90;
-var SERVER_PORT = 1337;
+//wiselyevents:
+var SERVER_PORT = 1337;    //only relevant for local-hosting.
+//leilot-ksumim:
+//var SERVER_PORT = 1338;    //only relevant for local-hosting.
 //dev
 //var SQL_URL = "localhost";
 //var SQL_User = "sa";
@@ -9,8 +12,8 @@ var SERVER_PORT = 1337;
 //var SQL_DB_Name = "wiselyev_wisely_app_sit";
 //prod1 (default)
 var SQL_URL = process.env.DB_HOSTURL || "81.218.117.73";
-var SQL_User = process.env.DB_USER ||"wiselyev_wiselys";
-var SQL_Password = process.env.DB_PASSWORD ||"sdasAA@$#FDSDFS";
+var SQL_User = process.env.DB_USER || "wiselyev_wiselys";
+var SQL_Password = process.env.DB_PASSWORD || "sdasAA@$#FDSDFS";
 var SQL_DB_Name = process.env.DB_SCHEMA_NAME || "wiselyev_wisely_app_sit";
 
 //prod2 (Dep2)
@@ -26,7 +29,7 @@ var SocksConnection = require('socksjs');
 var mysql = require('mysql2');
 var soap = require('soap');
 var url = require('url');
-var proxyUrl = process.env.QUOTAGUARDSTATIC_URL;
+var proxyUrl = process.env.QUOTAGUARDSTATIC_URL || process.env.FIXIE_SOCKS_HOST;
 var moment = require('moment-timezone');
 var StringBuilder = require('string-builder');
 
@@ -407,6 +410,95 @@ router.route('/bulkupdate/')
     //console.log(query);
     //update db
     //console.log(lQuery);
+    connPool.query(query, function (err, result, fields) {
+      if (err) {
+        logError(err, "/update");
+        res.end("Error " + err);
+        return;
+      }
+      //console.log(result);
+      res.end(JSON.stringify(result));
+    });
+
+    req.body.Items.forEach(function (guest) {
+
+      //send sms.
+      if (guest.SMSMessageText == null) {
+        return;
+      }
+      soap.createClient(sms_url, function (err, client) {
+        if (err) {
+          logError(err, "/update");
+          res.end("Error " + err);
+          return;
+        }
+        var sms_args = {
+          XMLString: "<SMS>\r\n<USERNAME>040553513</USERNAME>\r\n<PASSWORD>MeshiChen11</PASSWORD>\r\n<SENDER_PREFIX>ALFA</SENDER_PREFIX>\r\n<SENDER_SUFFIX><![CDATA[WiselyEvent]]></SENDER_SUFFIX>\r\n<MSGLNG>HEB</MSGLNG>\r\n<MSG><![CDATA[" + guest.SMSMessageText + "]]></MSG>\r\n<MOBILE_LIST>\r\n <MOBILE_NUMBER>" + guest.PhoneNumber + "</MOBILE_NUMBER>\r\n</MOBILE_LIST>\r\n<UNICODE>False</UNICODE>\r\n<USE_PERSONAL>False</USE_PERSONAL>\r\n</SMS>"
+        };
+
+        client.SUBMITSMS(sms_args, function (err, result) {
+          if (err || !result.SUBMITSMSResult.startsWith("Submit OK")) {
+            logError(err, "/update");
+
+          }
+          console.log(result);
+        });
+      });
+    });
+
+  });
+
+//api: bulk import guests
+//clears all guests list and replaces with given items.
+
+router.route('/bulkImport/')
+
+  .post(function (req, res) {
+
+    if (!req.body.Items)
+      return;
+
+    res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
+    console.log('here1');
+    //clears guests list (IIFE).
+    (function () {
+      connPool.query("Truncate table guests",
+        function (err, result, fields) {
+          if (err) {
+            logError(err, "/all");;
+            return;
+          }
+        });
+    })();
+
+    //imports the new ones.
+    console.log('here2');
+
+    //console.log(getTimeOfDay(req.body.LastUpdateDate));
+    var sb = new StringBuilder();
+    var start = "Insert into guests(guest_id,event_id,name,table_number,num_guests,new_table_number,new_num_guests,new_arrival_time,new_handled_by,comments,phone,side,category) Values (";
+    sb.appendLine(start);
+    console.log('here3');
+    for (var i = 0; i < req.body.Items.length; i++) {
+      var guest = req.body.Items[i];
+      var line = "[" + connPool.escape(guest.HandledBy) + "," + getTimeOfDayWithOffset(guest.LastUpdateDate) +
+        "', " + guest.NumOfGuestsAttending + ", " + guest.NumOfGuestsApproved +
+        ", " + connPool.escape(guest.Name) + ", " + connPool.escape(guest.PhoneNumber) +
+        ", " + connPool.escape(guest.Group) + ", " + connPool.escape(guest.WeddingSide) +
+        ", " + connPool.escape(guest.TableNumber) + ", " + connPool.escape(guest.Comments) + "]";
+      line = line.replace(/'null'/g, "null");  //fix for null values.
+      sb.appendLine(line);
+      if (i != (req.body.Items.length-1)) {   //not last line.
+        sb.append(",");
+      }
+    }
+    sb.appendLine(")");
+    console.log('here4');
+    var query = sb.toString();
+    //console.log(query);
+    //update db
+    console.log(query );
+    return;
     connPool.query(query, function (err, result, fields) {
       if (err) {
         logError(err, "/update");
