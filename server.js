@@ -45,8 +45,9 @@ var proxyConnection;
 var connPool;
 if (proxyUrl) {
 
+  /*Global proxyUrl */
 
-  var proxy = url.parse(process.env.QUOTAGUARDSTATIC_URL),
+  var proxy = url.parse(proxyUrl),
     auth = proxy.auth,
     username = auth.split(':')[0],
     pass = auth.split(':')[1];
@@ -73,7 +74,7 @@ if (proxyUrl) {
     dateStrings: "DATETIME"
   });
 
-  console.log('connection made to db via pool against (' + SQL_URL + ') via Proxy');
+  console.log('connection made to db via pool against (' + SQL_URL + ') via Proxy (' + proxyUrl + ')');
 }
 else {
 
@@ -117,10 +118,11 @@ var GetSQLTimeZoneOffset = function () {
 
 
 function reconnectToDB() {
+  /*Global proxyUrl */
 
   console.log('reconnectToDB');
   console.log('db connection restarting...');
-  var proxy = url.parse(process.env.QUOTAGUARDSTATIC_URL),
+  var proxy = url.parse(proxyUrl),
     auth = proxy.auth,
     username = auth.split(':')[0],
     pass = auth.split(':')[1];
@@ -488,7 +490,7 @@ router.route('/bulkImport/')
         ", " + connPool.escape(guest.TableNumber) + ", " + connPool.escape(guest.Comments) + "]";
       line = line.replace(/'null'/g, "null");  //fix for null values.
       sb.appendLine(line);
-      if (i != (req.body.Items.length-1)) {   //not last line.
+      if (i != (req.body.Items.length - 1)) {   //not last line.
         sb.append(",");
       }
     }
@@ -497,7 +499,7 @@ router.route('/bulkImport/')
     var query = sb.toString();
     //console.log(query);
     //update db
-    console.log(query );
+    console.log(query);
     return;
     connPool.query(query, function (err, result, fields) {
       if (err) {
