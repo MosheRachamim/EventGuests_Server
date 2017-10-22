@@ -11,16 +11,16 @@ var SERVER_PORT = 1337;    //only relevant for local-hosting.
 //var SQL_Password = "123456";
 //var SQL_DB_Name = "wiselyev_wisely_app_sit";
 //prod1 (default)
-//var SQL_URL = process.env.DB_HOSTURL || "81.218.117.73";
-//var SQL_User = process.env.DB_USER || "wiselyev_wiselys";
-//var SQL_Password = process.env.DB_PASSWORD || "sdasAA@$#FDSDFS";
-//var SQL_DB_Name = process.env.DB_SCHEMA_NAME || "wiselyev_wisely_app_sit";
+var SQL_URL = process.env.DB_HOSTURL || "81.218.117.73";
+var SQL_User = process.env.DB_USER || "wiselyev_wiselys";
+var SQL_Password = process.env.DB_PASSWORD || "sdasAA@$#FDSDFS";
+var SQL_DB_Name = process.env.DB_SCHEMA_NAME || "wiselyev_wisely_app_sit";
 
 //prod2 (Dep2)
-var SQL_URL = process.env.DB_HOSTURL || "81.218.117.73";
-var SQL_User = process.env.DB_USER || "wiselyev_leilot_ksumim";
-var SQL_Password = process.env.DB_PASSWORD || "leilot_ksfI!fv9c";
-var SQL_DB_Name = process.env.DB_SCHEMA_NAME || "wiselyev_leilot_ksumim";
+//var SQL_URL = process.env.DB_HOSTURL || "81.218.117.73";
+//var SQL_User = process.env.DB_USER || "wiselyev_leilot_ksumim";
+//var SQL_Password = process.env.DB_PASSWORD || "leilot_ksfI!fv9c";
+//var SQL_DB_Name = process.env.DB_SCHEMA_NAME || "wiselyev_leilot_ksumim";
 
 //prod3 (Heroku/Dep1)
 //var SQL_URL = process.env.DB_HOSTURL || "eu-cdbr-west-01.cleardb.com";
@@ -353,7 +353,7 @@ router.route('/update/:guest_id')
     res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
     //update db
     var lQuery = "Update guests set " +
-      " new_handled_by=" + connPool.escape(req.body.HandledBy) + ", new_arrival_time ='" + getTimeOfDayWithOffset(req.body.LastUpdateDate) +
+      " new_handled_by=" + connPool.escape(req.body.HandledBy) + ", new_arrival_time ='" + getTimeOfDay(req.body.LastUpdateDate) +
       "', new_num_guests=" + req.body.NumOfGuestsAttending + ", num_guests=" + req.body.NumOfGuestsApproved +
       ", Name=" + connPool.escape(req.body.Name) + ", phone =" + connPool.escape(req.body.PhoneNumber) +
       ", category =" + connPool.escape(req.body.Group) + ", side =" + connPool.escape(req.body.WeddingSide) +
@@ -417,7 +417,7 @@ router.route('/bulkupdate/')
         console.log('test3 ' + clientTimeOffSet);
       }
       var lQueryOne = "Update guests set " +
-        " new_handled_by=" + connPool.escape(guest.HandledBy) + ", new_arrival_time ='" + getTimeOfDayWithOffset(guest.LastUpdateDate) +
+        " new_handled_by=" + connPool.escape(guest.HandledBy) + ", new_arrival_time ='" + getTimeOfDay(guest.LastUpdateDate) +
         "', new_num_guests=" + guest.NumOfGuestsAttending + ", num_guests=" + guest.NumOfGuestsApproved +
         ", Name=" + connPool.escape(guest.Name) + ", phone =" + connPool.escape(guest.PhoneNumber) +
         ", category =" + connPool.escape(guest.Group) + ", side =" + connPool.escape(guest.WeddingSide) +
@@ -501,7 +501,7 @@ router.route('/bulkImport/')
     console.log('here3');
     for (var i = 0; i < req.body.Items.length; i++) {
       var guest = req.body.Items[i];
-      var line = "[" + connPool.escape(guest.HandledBy) + "," + getTimeOfDayWithOffset(guest.LastUpdateDate) +
+      var line = "[" + connPool.escape(guest.HandledBy) + "," + getTimeOfDay(guest.LastUpdateDate) +
         "', " + guest.NumOfGuestsAttending + ", " + guest.NumOfGuestsApproved +
         ", " + connPool.escape(guest.Name) + ", " + connPool.escape(guest.PhoneNumber) +
         ", " + connPool.escape(guest.Group) + ", " + connPool.escape(guest.WeddingSide) +
