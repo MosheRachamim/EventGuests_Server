@@ -2,19 +2,19 @@
 //consts.
 //var SQLMAXCONNECTIONS = 90;
 //wiselyevents:
-var SERVER_PORT = 1337;    //only relevant for local-hosting.
+//var SERVER_PORT = 1337;    //only relevant for local-hosting.
 //leilot-ksumim:
-//var SERVER_PORT = 1338;    //only relevant for local-hosting.
+var SERVER_PORT = 1338;    //only relevant for local-hosting.
 //dev
 //var SQL_URL = "localhost";
 //var SQL_User = "sa";
 //var SQL_Password = "123456";
 //var SQL_DB_Name = "wiselyev_wisely_app_sit";
 //prod1 (default)
-var SQL_URL = process.env.DB_HOSTURL || "81.218.117.73";
-var SQL_User = process.env.DB_USER || "wiselyev_wiselys";
-var SQL_Password = process.env.DB_PASSWORD || "sdasAA@$#FDSDFS";
-var SQL_DB_Name = process.env.DB_SCHEMA_NAME || "wiselyev_wisely_app_sit";
+//var SQL_URL = process.env.DB_HOSTURL || "81.218.117.73";
+//var SQL_User = process.env.DB_USER || "wiselyev_wiselys";
+//var SQL_Password = process.env.DB_PASSWORD || "sdasAA@$#FDSDFS";
+//var SQL_DB_Name = process.env.DB_SCHEMA_NAME || "wiselyev_wisely_app_sit";
 
 //prod2 (Dep2)
 //var SQL_URL = process.env.DB_HOSTURL || "81.218.117.73";
@@ -29,10 +29,10 @@ var SQL_DB_Name = process.env.DB_SCHEMA_NAME || "wiselyev_wisely_app_sit";
 //var SQL_DB_Name = process.env.DB_SCHEMA_NAME || "heroku_8fa7c59b81405c1";
 
 //prod4 (Heroku/Dep2)
-//var SQL_URL = process.env.DB_HOSTURL || "us-cdbr-iron-east-05.cleardb.net";
-//var SQL_User =process.env.DB_USER ||"b1ca58a8bb5985";
-//var SQL_Password = process.env.DB_PASSWORD || "2537b76e";
-//var SQL_DB_Name = process.env.DB_SCHEMA_NAME || "heroku_c73124b25ab23c5";
+var SQL_URL = process.env.DB_HOSTURL || "us-cdbr-iron-east-05.cleardb.net";
+var SQL_User =process.env.DB_USER ||"b1ca58a8bb5985";
+var SQL_Password = process.env.DB_PASSWORD || "2537b76e";
+var SQL_DB_Name = process.env.DB_SCHEMA_NAME || "heroku_c73124b25ab23c5";
 
 var express = require('express');
 var app = express();
@@ -563,6 +563,7 @@ function getTimeOfDay(dateTime) {
   if (dateTime != null) {
 
     /*GLOBAL clientTimeOffSet*/
+    console.log(dateTime);
     var datetimeUTC = new moment(dateTime).format("HH:mm:ss");
     console.log(datetimeUTC);
 
