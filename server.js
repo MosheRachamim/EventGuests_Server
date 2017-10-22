@@ -124,7 +124,7 @@ var GetSQLTimeZoneOffset = function () {
         throw err; //Note: Throws from app if fails.
       }
 
-      clientTimeOffSet = process.env.ClientTimeOffSet || ("+" + result[0].val);
+      clientTimeOffSet = process.env.CLIENT_TIME_OFFSET || ("+" + result[0].val);
       console.log("Timezone offset = " + clientTimeOffSet);
     });
 }();
