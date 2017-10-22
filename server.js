@@ -22,6 +22,18 @@ var SQL_DB_Name = process.env.DB_SCHEMA_NAME || "wiselyev_wisely_app_sit";
 //var SQL_Password = process.env.DB_PASSWORD || "leilot_ksfI!fv9c";
 //var SQL_DB_Name = process.env.DB_SCHEMA_NAME || "wiselyev_leilot_ksumim";
 
+//prod3 (Heroku/Dep1)
+//var SQL_URL = "eu-cdbr-west-01.cleardb.com";
+//var SQL_User ="b60386d15a4877";
+//var SQL_Password ="920be798";
+//var SQL_DB_Name = "heroku_8fa7c59b81405c1";
+
+//prod4 (Heroku/Dep2)
+//var SQL_URL = "us-cdbr-iron-east-05.cleardb.net";
+//var SQL_User ="b1ca58a8bb5985";
+//var SQL_Password ="2537b76e";
+//var SQL_DB_Name = "heroku_c73124b25ab23c5";
+
 var express = require('express');
 var app = express();
 var bodyParser = require('body-parser');
@@ -30,6 +42,7 @@ var mysql = require('mysql2');
 var soap = require('soap');
 var url = require('url');
 var proxyUrl = process.env.QUOTAGUARDSTATIC_URL || process.env.FIXIE_SOCKS_HOST;
+var hosted = process.env.DB_HOSTURL;
 var moment = require('moment-timezone');
 var StringBuilder = require('string-builder');
 
@@ -398,7 +411,7 @@ router.route('/bulkupdate/')
     for (var i = 0; i < req.body.Items.length; i++) {
       //test
       var guest = req.body.Items[i];
-      if (proxyUrl && guest.HandledBy) {
+      if (hosted && guest.HandledBy) {
         console.log('test1 ' + guest.LastUpdateDate);
         console.log('test2 ' + getTimeOfDayWithOffset(guest.LastUpdateDate));
       }
