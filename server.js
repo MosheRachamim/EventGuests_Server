@@ -11,28 +11,28 @@ var SERVER_PORT = 1337;    //only relevant for local-hosting.
 //var SQL_Password = "123456";
 //var SQL_DB_Name = "wiselyev_wisely_app_sit";
 //prod1 (default)
-var SQL_URL = process.env.DB_HOSTURL || "81.218.117.73";
-var SQL_User = process.env.DB_USER || "wiselyev_wiselys";
-var SQL_Password = process.env.DB_PASSWORD || "sdasAA@$#FDSDFS";
-var SQL_DB_Name = process.env.DB_SCHEMA_NAME || "wiselyev_wisely_app_sit";
+//var SQL_URL = process.env.DB_HOSTURL || "81.218.117.73";
+//var SQL_User = process.env.DB_USER || "wiselyev_wiselys";
+//var SQL_Password = process.env.DB_PASSWORD || "sdasAA@$#FDSDFS";
+//var SQL_DB_Name = process.env.DB_SCHEMA_NAME || "wiselyev_wisely_app_sit";
 
 //prod2 (Dep2)
-//var SQL_URL = process.env.DB_HOSTURL || "81.218.117.73";
-//var SQL_User = process.env.DB_USER || "wiselyev_leilot_ksumim";
-//var SQL_Password = process.env.DB_PASSWORD || "leilot_ksfI!fv9c";
-//var SQL_DB_Name = process.env.DB_SCHEMA_NAME || "wiselyev_leilot_ksumim";
+var SQL_URL = process.env.DB_HOSTURL || "81.218.117.73";
+var SQL_User = process.env.DB_USER || "wiselyev_leilot_ksumim";
+var SQL_Password = process.env.DB_PASSWORD || "leilot_ksfI!fv9c";
+var SQL_DB_Name = process.env.DB_SCHEMA_NAME || "wiselyev_leilot_ksumim";
 
 //prod3 (Heroku/Dep1)
-//var SQL_URL = "eu-cdbr-west-01.cleardb.com";
-//var SQL_User ="b60386d15a4877";
-//var SQL_Password ="920be798";
-//var SQL_DB_Name = "heroku_8fa7c59b81405c1";
+//var SQL_URL = process.env.DB_HOSTURL || "eu-cdbr-west-01.cleardb.com";
+//var SQL_User =process.env.DB_USER ||"b60386d15a4877";
+//var SQL_Password =process.env.DB_PASSWORD||  "920be798";
+//var SQL_DB_Name = process.env.DB_SCHEMA_NAME || "heroku_8fa7c59b81405c1";
 
 //prod4 (Heroku/Dep2)
-//var SQL_URL = "us-cdbr-iron-east-05.cleardb.net";
-//var SQL_User ="b1ca58a8bb5985";
-//var SQL_Password ="2537b76e";
-//var SQL_DB_Name = "heroku_c73124b25ab23c5";
+//var SQL_URL = process.env.DB_HOSTURL || "us-cdbr-iron-east-05.cleardb.net";
+//var SQL_User =process.env.DB_USER ||"b1ca58a8bb5985";
+//var SQL_Password = process.env.DB_PASSWORD || "2537b76e";
+//var SQL_DB_Name = process.env.DB_SCHEMA_NAME || "heroku_c73124b25ab23c5";
 
 var express = require('express');
 var app = express();
@@ -83,7 +83,7 @@ if (proxyUrl) {
     connectTimeout: 30000,
     acquireTimeout: 30000,
     //queueLimit: 30,
-    timezone: "utc" + clientTimeOffSet,
+    //timezone: "utc" + clientTimeOffSet,
     dateStrings: "DATETIME"
   });
 
@@ -101,7 +101,7 @@ else {
     connectTimeout: 30000,
     acquireTimeout: 30000,
     //queueLimit: 30,
-    timezone: "utc" + clientTimeOffSet,
+    //timezone: "utc" + clientTimeOffSet,
     dateStrings: "DATETIME"
   });
 
@@ -124,7 +124,7 @@ var GetSQLTimeZoneOffset = function () {
         throw err; //Note: Throws from app if fails.
       }
 
-      clientTimeOffSet = "+" + result[0].val;
+      clientTimeOffSet = process.env.ClientTimeOffSet || ("+" + result[0].val);
       console.log("Timezone offset = " + clientTimeOffSet);
     });
 }();
@@ -157,7 +157,7 @@ function reconnectToDB() {
     connectTimeout: 30000,
     acquireTimeout: 30000,
     //queueLimit: 30,
-    timezone: "utc" + clientTimeOffSet,
+    //timezone: "utc" + clientTimeOffSet,
     dateStrings: "DATETIME"
   });
   console.log('db connection restarted');
@@ -414,6 +414,7 @@ router.route('/bulkupdate/')
       if (hosted && guest.HandledBy) {
         console.log('test1 ' + guest.LastUpdateDate);
         console.log('test2 ' + getTimeOfDayWithOffset(guest.LastUpdateDate));
+        console.log('test3 ' + clientTimeOffSet);
       }
       var lQueryOne = "Update guests set " +
         " new_handled_by=" + connPool.escape(guest.HandledBy) + ", new_arrival_time ='" + getTimeOfDayWithOffset(guest.LastUpdateDate) +
@@ -578,6 +579,7 @@ function getTimeOfDayWithOffset(dateTime) {
   if (dateTime != null) {
 
     /*GLOBAL clientTimeOffSet*/
+    //console.log(dateTime);
     var datetimeUTC = new moment(dateTime).utcOffset(clientTimeOffSet).format("HH:mm:ss");
     //console.log(datetimeUTC);
 
