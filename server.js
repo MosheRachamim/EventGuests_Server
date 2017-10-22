@@ -417,7 +417,7 @@ router.route('/bulkupdate/')
         console.log('test3 ' + clientTimeOffSet);
       }
       var lQueryOne = "Update guests set " +
-        " new_handled_by=" + connPool.escape(guest.HandledBy) + ", new_arrival_time ='" + getTimeOfDay(guest.LastUpdateDate) +
+        " new_handled_by=" + connPool.escape(guest.HandledBy) + ", new_arrival_time ='" + getTimeOfDayWithOffset(guest.LastUpdateDate) +
         "', new_num_guests=" + guest.NumOfGuestsAttending + ", num_guests=" + guest.NumOfGuestsApproved +
         ", Name=" + connPool.escape(guest.Name) + ", phone =" + connPool.escape(guest.PhoneNumber) +
         ", category =" + connPool.escape(guest.Group) + ", side =" + connPool.escape(guest.WeddingSide) +
