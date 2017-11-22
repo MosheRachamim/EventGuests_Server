@@ -2,9 +2,9 @@
 //consts.
 //var SQLMAXCONNECTIONS = 90;
 //wiselyevents:
-//var SERVER_PORT = 1337;    //only relevant for local-hosting.
+var SERVER_PORT = 1337;    //only relevant for local-hosting.
 //leilot-ksumim:
-var SERVER_PORT = 1338;    //only relevant for local-hosting.
+//var SERVER_PORT = 1338;    //only relevant for local-hosting.
 //dev
 //var SQL_URL = "localhost";
 //var SQL_User = "sa";
@@ -23,16 +23,16 @@ var SERVER_PORT = 1338;    //only relevant for local-hosting.
 //var SQL_DB_Name = process.env.DB_SCHEMA_NAME || "wiselyev_leilot_ksumim";
 
 //prod3 (Heroku/Dep1)
-//var SQL_URL = process.env.DB_HOSTURL || "eu-cdbr-west-01.cleardb.com";
-//var SQL_User =process.env.DB_USER ||"b60386d15a4877";
-//var SQL_Password =process.env.DB_PASSWORD||  "920be798";
-//var SQL_DB_Name = process.env.DB_SCHEMA_NAME || "heroku_8fa7c59b81405c1";
+var SQL_URL = process.env.DB_HOSTURL || "eu-cdbr-west-01.cleardb.com";
+var SQL_User =process.env.DB_USER ||"b60386d15a4877";
+var SQL_Password =process.env.DB_PASSWORD||  "920be798";
+var SQL_DB_Name = process.env.DB_SCHEMA_NAME || "heroku_8fa7c59b81405c1";
 
 //prod4 (Heroku/Dep2)
-var SQL_URL = process.env.DB_HOSTURL || "us-cdbr-iron-east-05.cleardb.net";
-var SQL_User =process.env.DB_USER ||"b1ca58a8bb5985";
-var SQL_Password = process.env.DB_PASSWORD || "2537b76e";
-var SQL_DB_Name = process.env.DB_SCHEMA_NAME || "heroku_c73124b25ab23c5";
+//var SQL_URL = process.env.DB_HOSTURL || "us-cdbr-iron-east-05.cleardb.net";
+//var SQL_User =process.env.DB_USER ||"b1ca58a8bb5985";
+//var SQL_Password = process.env.DB_PASSWORD || "2537b76e";
+//var SQL_DB_Name = process.env.DB_SCHEMA_NAME || "heroku_c73124b25ab23c5";
 
 var express = require('express');
 var app = express();
