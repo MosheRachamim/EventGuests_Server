@@ -468,92 +468,103 @@ router.route('/bulkupdate/')
 
   });
 
-//api: bulk import guests
-//clears all guests list and replaces with given items.
-
-router.route('/bulkImport/')
+//api: set new event
+//clears the current event, and sets the given one including all guests.
+router.route('/setNewEvent/')
 
   .post(function (req, res) {
 
-    if (!req.body.Items)
+    if (!req.body.Event || !req.body.Guests)
       return;
 
-    res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
-    console.log('here1');
-    //clears guests list (IIFE).
+    //STEP 1:clears guests list (IIFE).
     (function () {
       connPool.query("Truncate table guests",
         function (err, result, fields) {
           if (err) {
-            logError(err, "/all");;
+            logError(err, "/setNewEvent_clearGuests");;
+            res.end("Error " + err);
             return;
           }
+
+          res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
+
+          //STEP 2:clears all events (IIFE).
+          (function () {
+            connPool.query("SET FOREIGN_KEY_CHECKS = 0; Truncate table events;SET FOREIGN_KEY_CHECKS = 1; ",
+              function (err, result, fields) {
+                if (err) {
+                  logError(err, "/setNewEvent_clearEvents");;
+                  res.end("Error " + err);
+                  return;
+                }
+
+
+                //STEP 3:adds the given event (IIFE)
+                (function () {
+                  var sql = "Insert into events(name,event_date,location,representative_phone_numbers_list,manager_phone_numbers_list) values('"
+                    + req.body.Event.Name + "','" + req.body.Event.Date + "','" + req.body.Event.Location + "','" + req.body.Event.RepresentativePhoneNumbersList + "','" + req.body.Event.ManagerPhoneNumbersList + "')";
+                  //console.log(sql);
+                  connPool.query(sql,
+                    function (err, result, fields) {
+                      if (err) {
+                        logError(err, "/setNewEvent_add_event");;
+                        res.end("Error " + err);
+                        return;
+                      }
+
+                      //STEP 4: imports the new guests to the new event.
+                      //console.log('here2');
+                      //return;
+
+                      //console.log(getTimeOfDay(req.body.LastUpdateDate));
+                      var sb = new StringBuilder();
+                      var start = "Insert into guests(event_id,name,table_number,num_guests,comments,phone,side,category) Values ";
+                      sb.appendLine(start);
+                      console.log('here3');
+                      var eventIDDefault = 1;
+                      for (var i = 0; i < req.body.Guests.length; i++) {
+                        var guest = req.body.Guests[i];
+                        var line = "(" + eventIDDefault + "," + connPool.escape(guest.Name) + "," + connPool.escape(guest.TableNumber) +
+                          ", " + guest.NumOfGuestsApproved + "," + connPool.escape(guest.Comments) +
+                          ", " + connPool.escape(guest.PhoneNumber) + ", " + connPool.escape(guest.WeddingSide) +
+                          ", " + connPool.escape(guest.Group) + ")";
+                        line = line.replace(/'null'/g, "null");  //fix for null values.
+                        sb.appendLine(line);
+                        if (i != (req.body.Guests.length - 1)) {   //not last line.
+                          sb.append(",");
+                        }
+                      }
+                      //sb.appendLine(")");
+                      //console.log('here4');
+                      var query = sb.toString();
+                      //console.log(query);
+                      //update db
+                      //console.log(query);
+                      //return;
+                      connPool.query(query, function (err, result, fields) {
+                        if (err) {
+                          logError(err, "/setNewEvent_addGuests");
+                          res.end("Error " + err);
+                          return;
+                        }
+                        //console.log(result);
+                        res.end("OK " + JSON.stringify(result));
+                      });
+
+                    });
+                })();
+
+              });
+          })();
+
+
         });
     })();
 
-    //imports the new ones.
-    console.log('here2');
 
-    //console.log(getTimeOfDay(req.body.LastUpdateDate));
-    var sb = new StringBuilder();
-    var start = "Insert into guests(guest_id,event_id,name,table_number,num_guests,new_table_number,new_num_guests,new_arrival_time,new_handled_by,comments,phone,side,category) Values (";
-    sb.appendLine(start);
-    console.log('here3');
-    for (var i = 0; i < req.body.Items.length; i++) {
-      var guest = req.body.Items[i];
-      var line = "[" + connPool.escape(guest.HandledBy) + "," + getTimeOfDay(guest.LastUpdateDate) +
-        "', " + guest.NumOfGuestsAttending + ", " + guest.NumOfGuestsApproved +
-        ", " + connPool.escape(guest.Name) + ", " + connPool.escape(guest.PhoneNumber) +
-        ", " + connPool.escape(guest.Group) + ", " + connPool.escape(guest.WeddingSide) +
-        ", " + connPool.escape(guest.TableNumber) + ", " + connPool.escape(guest.Comments) + "]";
-      line = line.replace(/'null'/g, "null");  //fix for null values.
-      sb.appendLine(line);
-      if (i != (req.body.Items.length - 1)) {   //not last line.
-        sb.append(",");
-      }
-    }
-    sb.appendLine(")");
-    console.log('here4');
-    var query = sb.toString();
-    //console.log(query);
-    //update db
-    console.log(query);
-    return;
-    connPool.query(query, function (err, result, fields) {
-      if (err) {
-        logError(err, "/update");
-        res.end("Error " + err);
-        return;
-      }
-      //console.log(result);
-      res.end(JSON.stringify(result));
-    });
 
-    req.body.Items.forEach(function (guest) {
 
-      //send sms.
-      if (guest.SMSMessageText == null) {
-        return;
-      }
-      soap.createClient(sms_url, function (err, client) {
-        if (err) {
-          logError(err, "/update");
-          res.end("Error " + err);
-          return;
-        }
-        var sms_args = {
-          XMLString: "<SMS>\r\n<USERNAME>040553513</USERNAME>\r\n<PASSWORD>MeshiChen11</PASSWORD>\r\n<SENDER_PREFIX>ALFA</SENDER_PREFIX>\r\n<SENDER_SUFFIX><![CDATA[WiselyEvent]]></SENDER_SUFFIX>\r\n<MSGLNG>HEB</MSGLNG>\r\n<MSG><![CDATA[" + guest.SMSMessageText + "]]></MSG>\r\n<MOBILE_LIST>\r\n <MOBILE_NUMBER>" + guest.PhoneNumber + "</MOBILE_NUMBER>\r\n</MOBILE_LIST>\r\n<UNICODE>False</UNICODE>\r\n<USE_PERSONAL>False</USE_PERSONAL>\r\n</SMS>"
-        };
-
-        client.SUBMITSMS(sms_args, function (err, result) {
-          if (err || !result.SUBMITSMSResult.startsWith("Submit OK")) {
-            logError(err, "/update");
-
-          }
-          console.log(result);
-        });
-      });
-    });
 
   });
 
@@ -563,7 +574,7 @@ function getTimeOfDay(dateTime) {
   if (dateTime != null) {
 
     /*GLOBAL clientTimeOffSet*/
-    console.log(dateTime);
+    //console.log(dateTime);
     var datetimeUTC = new moment(dateTime).format("HH:mm:ss");
     console.log(datetimeUTC);
 
@@ -686,6 +697,80 @@ router.route('/sendMissingGuestsSms/')
 
   });
 
+
+//api get all guests
+router.get('/getTablesStats', function (req, res) {
+
+  res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
+  var event_id = 1;//req.params.event_id;
+  var sql1 = "Select name,location,event_date from events where event_id=" + event_id;
+  var sql2 = "Select COALESCE(sum(num_guests),0) as approved,COALESCE(sum(new_num_guests),0) as arrived,COALESCE(sum(num_guests)/sum(new_num_guests)*100,0) as percentage from guests where event_id=" + event_id;
+  var sql3 =
+    "select table_number, COALESCE(sum(num_guests),0) as approved, COALESCE(sum(new_num_guests),0) as arrived, COALESCE(sum(num_guests) /sum(new_num_guests)*100,0) as percentage " +
+    "from guests " +
+    "where event_id=" + event_id + " " +
+    "group by table_number ";
+  var sql4 = "Select * from guests order by table_number";
+
+  //sql1
+  connPool.query(sql1, function (err, result, fields) {
+    if (err) {
+      logError(err, "/getTablesStats1");;
+      res.end("Error " + err);
+      return;
+    }
+    var a;
+    var b;
+    var c;
+    var d;
+    //res.write(JSON.stringify(result));
+    a = result;
+    //then sql2
+    connPool.query(sql2, function (err, result, fields) {
+      if (err) {
+        logError(err, "/getTablesStats2");;
+        res.end("Error " + err);
+        return;
+      }
+      //res.write(JSON.stringify(result));
+      b = result;
+      //then sql3
+      connPool.query(sql3, function (err, result, fields) {
+        if (err) {
+          logError(err, "/getTablesStats3");;
+          res.end("Error " + err);
+          return;
+        }
+        //res.write(JSON.stringify(result));
+        c = result;
+        //then sql4
+        connPool.query(sql4, function (err, result, fields) {
+          if (err) {
+            logError(err, "/getTablesStats4");;
+            res.end("Error " + err);
+            return;
+          }
+          //res.write(JSON.stringify(result));
+          d = result;
+
+          //a,b,c,d are ready and successful.
+          var full_result = {
+            eventData: a,
+            overallStats: b,
+            perTableStats: c,
+            allGuestsByTable: d
+          };
+          //send them all.
+          res.end(JSON.stringify(full_result));
+
+        });
+
+      });
+
+    });
+
+  });
+});
 
 
 
