@@ -607,6 +607,32 @@ function getTimeOfDayWithOffset(dateTime) {
   }
 }
 
+router.route('/shutDownNow/')
+
+  .get(function (req, res) {
+    res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
+
+    shutDown();
+  });
+
+
+//helper function: kill server.
+function shutDown() {
+  console.log('Received kill signal, shutting down gracefully');
+  server.close(() => {
+    console.log('Closed out remaining connections');
+    process.exit(0);
+  });
+
+  setTimeout(() => {
+    console.error('Could not close connections in time, forcefully shutting down');
+    process.exit(1);
+  }, 10000);
+
+  connections.forEach(curr => curr.end());
+  setTimeout(() => connections.forEach(curr => curr.destroy()), 5000);
+}
+
 
 router.route('/sendStatsSms/')
 
@@ -787,7 +813,7 @@ app.use('/wizelyapi1', router);
 
 process.on('exit', function () {
   // Add shutdown logic here.
-  pool.end(function (err) {
+  connPool.end(function (err) {
     if (err != null) {
       // all connections in the pool have ended
       logError(err, "close sql pool");
@@ -821,5 +847,18 @@ process.on('exit', function () {
 
 // START THE SERVER
 // =============================================================================
-app.listen(port);
+const server = app.listen(port);
+//setInterval(() => server.getConnections(
+//  (err, connections) => console.log(`${connections} connections currently open`)
+//), 1000);
+
+process.on('SIGTERM', shutDown);
+process.on('SIGINT', shutDown);
+
+let connections = [];
+
+server.on('connection', connection => {
+  connections.push(connection);
+  connection.on('close', () => connections = connections.filter(curr => curr !== connection));
+});
 console.log('Event Guests Server is running on port ' + port);

@@ -1,5 +1,9 @@
 'use strict';
 //consts.
+//dev
+//var CURRENT_ENVIRONMENT = "dev";
+//wiselyevents/leilot-ksumim
+var CURRENT_ENVIRONMENT = "prod";
 //var SQLMAXCONNECTIONS = 90;
 //wiselyevents:
 var SERVER_PORT = 1337;    //only relevant for local-hosting.
@@ -784,12 +788,24 @@ router.get('/getTablesStats', function (req, res) {
           //res.write(JSON.stringify(result));
           d = result;
 
-          //a,b,c,d are ready and successful.
+          //pud d inside of c
+          d.forEach(element => {
+            c.forEach(element0 => {
+
+              if (element0.table_number === element.table_number) {
+                if (element0.guests === undefined) {
+                  element0.guests = [];
+                }
+                element0.guests.push(element);
+              }
+            });
+          });
+
+          //a,b,c are ready and successful.
           var full_result = {
             eventData: a,
             overallStats: b,
-            perTableStats: c,
-            allGuestsByTable: d
+            tableStats: c
           };
           //send them all.
           res.end(JSON.stringify(full_result));
@@ -852,8 +868,11 @@ const server = app.listen(port);
 //  (err, connections) => console.log(`${connections} connections currently open`)
 //), 1000);
 
-process.on('SIGTERM', shutDown);
-process.on('SIGINT', shutDown);
+if (CURRENT_ENVIRONMENT !== "dev") {
+
+  process.on('SIGTERM', shutDown);
+  process.on('SIGINT', shutDown);
+}
 
 let connections = [];
 
