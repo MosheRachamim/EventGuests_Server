@@ -739,9 +739,9 @@ router.get('/getTablesStats', function (req, res) {
   res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
   var event_id = 1;//req.params.event_id;
   var sql1 = "Select name,location,event_date from events where event_id=" + event_id;
-  var sql2 = "Select COALESCE(sum(num_guests),0) as approved,COALESCE(sum(new_num_guests),0) as arrived,COALESCE(sum(num_guests)/sum(new_num_guests)*100,0) as percentage from guests where event_id=" + event_id;
+  var sql2 = "Select COALESCE(sum(num_guests),0) as approved,COALESCE(sum(new_num_guests),0) as arrived,COALESCE(sum(new_num_guests)/sum(num_guests)*100,0) as percentage from guests where event_id=" + event_id;
   var sql3 =
-    "select table_number, COALESCE(sum(num_guests),0) as approved, COALESCE(sum(new_num_guests),0) as arrived, COALESCE(sum(num_guests) /sum(new_num_guests)*100,0) as percentage " +
+    "select table_number, COALESCE(sum(num_guests),0) as approved, COALESCE(sum(new_num_guests),0) as arrived, COALESCE(sum(new_num_guests) /sum(num_guests)*100,0) as percentage " +
     "from guests " +
     "where event_id=" + event_id + " " +
     "group by table_number ";
