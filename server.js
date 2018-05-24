@@ -790,7 +790,7 @@ router.get('/getTablesStats', function (req, res) {
 
           //pud d inside of c
           d.forEach(element => {
-            c.forEach(element => {
+            c.forEach(element0 => {
 
 			  if(!element.num_guests || element.num_guests==null)
 			  {
@@ -800,11 +800,11 @@ router.get('/getTablesStats', function (req, res) {
 			  {
 			  element.new_num_guests=0;
 			  }
-              if (element.table_number === element.table_number) {
-                if (element.guests === undefined) {
-                  element.guests = [];
+              if (element0.table_number === element.table_number) {
+                if (element0.guests === undefined) {
+                  element0.guests = [];
                 }
-                element.guests.push(element);
+                element0.guests.push(element);
               }
             });
           });
