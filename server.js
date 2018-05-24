@@ -792,6 +792,14 @@ router.get('/getTablesStats', function (req, res) {
           d.forEach(element => {
             c.forEach(element0 => {
 
+			  if(!element0.num_guests)
+			  {
+			  element0.num_guests=0;
+			  }
+			  if(!element0.new_num_guests)
+			  {
+			  element0.new_num_guests=0;
+			  }
               if (element0.table_number === element.table_number) {
                 if (element0.guests === undefined) {
                   element0.guests = [];
